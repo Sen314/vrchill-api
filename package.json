@@ -1,0 +1,10 @@
+{
+	"dependencies": {
+		"@keyv/sqlite": "^3.6.6",
+		"@koa/router": "^12.0.1",
+		"keyv": "^4.5.4",
+		"koa": "^2.14.2",
+		"youtube-sr": "^4.3.10"
+	},
+	"type": "module"
+}
