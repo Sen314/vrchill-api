@@ -1,42 +1,75 @@
-pre-fill VRCUrlInputField with user-friendly prefix:
+
+
+
+# Endpoints
+
+## GET `/search`
+
+### Required query parameters
+
+- `pool`: id of the VRCUrl pool, only letters numbers hyphens or underscores, optionally followed by an integer for pool size.
+- `input`: youtube search query. All chars up to and including this exact unicode char `→` are ignored, and then whitespace is trimmed.
+
+### Optional query parameters
+
+- `thumbnails`: if this exists thumbnails will be loaded.
+- `icons`: if this exists channel icons will be loaded.
+
+### Example URL
 
 ```
-https://api.u2b.cx/search/{domain}/   Type YouTube search query here →                       {user input}
+https://api.u2b.cx/search?pool=example10000&input=   Type YouTube search query here →                       penile apparatus
 ```
 
-{domain} must be short unique alphabetical string representing the world, and {user input} is end of string where user types. You can customize everything between / and → for cosmetic purposes, user input is everything after → with whitespace trimmed.
+### Response format
 
-Server will return JSON string of array of YouTube search results in this format:
+JSON object:
 
-- `id`: (string) YouTube video id
-- `vrcurl`: (number) index of VRCUrl that will redirect to the youtube url
-- `title`: (string)
-- `duration`: (number) video duration in ms
-- `durationString`: (string) formatted duration
-- `uploaded`: (string) when the video was uploaded (i.e. "12 years ago")
-- `views`: (number)
-- `thumbnail_vrcurl`: (number) index of VRCUrl that will redirect to thumbnail image url
-- `channel` (object)
-	- `name`: (string)
-	- `id`: (string)
-	- todo should we include icon?
+- `results`: Array of Object
+	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url
+	- `title`: (string)
+	- `id`: (string) YouTube video id
+	- `duration`: (integer) video duration in ms
+	- `durationString`: (string) formatted duration
+	- `uploaded`: (string) when the video was uploaded (i.e. "12 years ago")
+	- `views`: (integer)
+	- `channel`: (object)
+		- `name`: (string)
+		- `id`: (string)
+		- `icon_index`?: (string) The index of the channel icon in the image sheet. because it is deduplicated, it is not one-to-one
+- `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
 
-### VRCUrls
 
-Since VRCUrls are immutable you must define an array of at LEAST 10,000 VRCUrl instances like so:
+## GET `/vrcurl/{pool}/{index}`
+
+- `{pool}`: must be same as pool param in search endpoint.
+- `{index}`: vrcurl index number
+
+Response may be 302 redirect to youtube url or `image/jpeg` for imagesheet.
+
+# VRCUrls
+
+Since VRCUrls are immutable you must create a pool of them which the server will correspond with to receive user selections. Create an array of 10,000 VRCUrls like so:
 
 ```csharp
 VRCUrl[] vrcurl_pool = [
-	new VRCUrl("https://api.u2b.cx/vrcurl/{domain}/0"),
-	new VRCUrl("https://api.u2b.cx/vrcurl/{domain}/1"),
-	new VRCUrl("https://api.u2b.cx/vrcurl/{domain}/2"),
+	new VRCUrl("https://api.u2b.cx/vrcurl/{pool}/0"),
+	new VRCUrl("https://api.u2b.cx/vrcurl/{pool}/1"),
+	new VRCUrl("https://api.u2b.cx/vrcurl/{pool}/2"),
 	// etc...
 ]
 //todo: provide tool to auto generate
 ```
 
-The server converts all URLs in the JSON response such that the VRCUrl at the Nth index will be 302 redirected to its substitute, that is until the list of VRCUrls are cycled through.
+`{pool}` must be a unique string in the format `^[a-z-_]+\d*$`. You can specify the pool size by suffixing with an integer, or else the default is 10,000.
 
-{domain} must be the same as in the search url, it allows different worlds to use the same api without using the same pool of VRCUrls.
+All resources (youtube urls etc) referenced in the search results will be substituted by an integer that is the index of the VRCUrl in this array that will serve the resource.
 
-If you want a different size pool you can specify by suffixing an integer to {domain}, i.e. if the domain is `foobar1000` the server will cycle through 0-999. Your pool size must be equal or larger than this value.
+
+# Imagesheet
+
+Video thumbnails and channel icons are collated together into one image and served at a VRCUrl to be loaded by VRCImageDownloader.
+
+Thumbnails are 480x270, arranged vertically in the same order as the JSON results.
+
+Channel icons are 68x68 in the second column at x = 480.

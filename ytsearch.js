@@ -1,12 +1,13 @@
 import { YouTube } from "youtube-sr";
-import { toVrcUrl } from "./vrcurl.js";
+import { putVrcUrl } from "./vrcurl.js";
+import { makeImageSheetVrcUrl } from "./imagesheet.js";
 
 var cache = {};
 
-export async function cachedYoutubeSearch(domain, query) {
-	var key = `${domain}:${query}`;
+export async function cachedYoutubeSearch(pool, query, options) {
+	var key = JSON.stringify([pool, query, options]);
 	if (!cache[key]) {
-		cache[key] = youtubeSearch(domain, query);
+		cache[key] = youtubeSearch(pool, query, options);
 		setTimeout(() => {
 			delete cache[key];
 		}, 3.6e6); // cache results for an hour
@@ -14,27 +15,43 @@ export async function cachedYoutubeSearch(domain, query) {
 	return await cache[key];
 }
 
-async function youtubeSearch(domain, query) {
+async function youtubeSearch(pool, query, options = {}) {
 	console.debug("search:", query);
+
+	var data = {results: []};
 	var _results = await YouTube.search(query, {safeSearch: true});
 	console.debug(`raw:`, _results);
-	var results = [];
-	for (var result of _results) {
-		results.push({
-			id: result.id,
-			vrcurl: await toVrcUrl(domain, result.url),
-			title: result.title,
-			duration: result.duration,
-			durationString: result.durationFormatted,
-			uploaded: result.uploadedAt,
-			views: result.views,
-			thumbnail_vrcurl: await toVrcUrl(domain, result.thumbnail.url),
+
+	if (options.thumbnails) {
+		var thumbnailUrls = _results.map(video => video.thumbnail?.url);
+	}
+
+	if (options.icons) {
+		var iconUrls = new Set();
+		for (let result of _results) {
+			iconUrls.add(result.channel.icon.url);
+		}
+		iconUrls = [...iconUrls];
+	}
+
+	for (let video of _results) {
+		data.results.push({
+			id: video.id,
+			vrcurl: await putVrcUrl(pool, {type: "redirect", url: video.url}),
+			title: video.title,
+			duration: video.duration,
+			durationString: video.durationFormatted,
+			uploaded: video.uploadedAt,
+			views: video.views,
 			channel: {
-				name: result.channel.name,
-				id: result.channel.id
-				//todo icon?
+				name: video.channel?.name,
+				id: video.channel?.id,
+				icon_index: iconUrls?.indexOf(video.channel?.icon.url)
 			}
 		});
 	}
-	return results;
+
+	if (thumbnailUrls || iconUrls) data.imagesheet_vrcurl = await makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls);
+
+	return data;
 }
