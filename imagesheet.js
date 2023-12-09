@@ -4,8 +4,8 @@ import { putVrcUrl } from './vrcurl.js';
 var store = {};
 
 async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
-	const thumbnailWidth = 480;
-	const thumbnailHeight = 270;
+	const thumbnailWidth = 360;
+	const thumbnailHeight = 202;
 	const iconWidth = 68;
 	const iconHeight = 68;
 	const canvasWidth = (thumbnailUrls.length ? thumbnailWidth : 0) + (iconUrls.length ? iconWidth : 0);
@@ -28,7 +28,7 @@ async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
 		promises = promises.concat(iconUrls.map((url, index) => (async function(){
 			console.debug("load icon", url);
 			var image = await loadImage(url);
-			ctx.drawImage(image, thumbnailWidth, index * iconHeight, iconWidth, iconHeight);
+			ctx.drawImage(image, thumbnailUrls.length ? thumbnailWidth : 0, index * iconHeight, iconWidth, iconHeight);
 		})().catch(error => console.error(error.stack))));
 	}
 

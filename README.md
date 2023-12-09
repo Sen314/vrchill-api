@@ -12,8 +12,8 @@
 
 ### Optional query parameters
 
-- `thumbnails`: if this exists thumbnails will be loaded.
-- `icons`: if this exists channel icons will be loaded.
+- `thumbnails`: set to `1`, `true`, `yes`, `on` or whatever to load thumbnails
+- `icons`: set to `1`, `true`, `yes`, `on` or whatever to load channel icons
 
 ### Example URL
 
@@ -29,15 +29,16 @@ JSON object:
 	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url
 	- `title`: (string)
 	- `id`: (string) YouTube video id
-	- `duration`: (integer) video duration in ms
-	- `durationString`: (string) formatted duration
-	- `uploaded`: (string) when the video was uploaded (i.e. "12 years ago")
+	- `duration`: (string) video length i.e. `"3:03"`
+	- `durationString`: (string) DEPRECATED, same as duration
+	- `uploaded`: (string) when the video was uploaded i.e. `"12 years ago"`
 	- `views`: (integer)
 	- `channel`: (object)
 		- `name`: (string)
 		- `id`: (string)
 		- `icon_index`?: (string) The index of the channel icon in the image sheet. because it is deduplicated, it is not one-to-one
 - `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
+- `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results
 
 
 ## GET `/vrcurl/{pool}/{index}`
@@ -70,6 +71,6 @@ All resources (youtube urls etc) referenced in the search results will be substi
 
 Video thumbnails and channel icons are collated together into one image and served at a VRCUrl to be loaded by VRCImageDownloader.
 
-Thumbnails are 480x270, arranged vertically in the same order as the JSON results.
+Thumbnails are 360x202, arranged vertically in the same order as the JSON results.
 
-Channel icons are 68x68 in the second column at x = 480.
+Channel icons are 68x68 arranged vertically on the right of thumbnails.

@@ -1,8 +1,9 @@
 import Koa from "koa";
 import Router from "@koa/router";
-import { cachedYoutubeSearch } from "./ytsearch.js";
+import { cachedVRCYoutubeSearch } from "./ytsearch.js";
 import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
+import { stringToBoolean } from "./util.js";
 
 export var app = new Koa();
 var router = new Router();
@@ -23,11 +24,11 @@ router.get("/search", async ctx => {
 	}
 
 	var options = {
-		thumbnails: Boolean(ctx.query.thumbnails),
-		icons: Boolean(ctx.query.icons)
+		thumbnails: stringToBoolean(ctx.query.thumbnails),
+		icons: stringToBoolean(ctx.query.icons)
 	};
 
-	ctx.body = await cachedYoutubeSearch(ctx.query.pool, query, options);
+	ctx.body = await cachedVRCYoutubeSearch(ctx.query.pool, query, options);
 });
 
 
@@ -50,6 +51,8 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			ctx.body = buf;
 			ctx.type = "image/jpeg";
 			break;
+		case "ytsr_continuation":
+			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuation, dest.options);
 		default:
 			ctx.status = 500;
 	}
