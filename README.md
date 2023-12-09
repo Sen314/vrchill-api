@@ -46,7 +46,7 @@ JSON object:
 - `{pool}`: must be same as pool param in search endpoint.
 - `{index}`: vrcurl index number
 
-Response may be 302 redirect to youtube url or `image/jpeg` for imagesheet.
+Response may be 302 redirect to youtube url, `image/jpeg` for imagesheet or `application/json` for next page
 
 # VRCUrls
 
