@@ -12,7 +12,7 @@ export async function cachedVRCYoutubeSearch(pool, queryOrContinuation, options)
 		cache[key] = VRCYoutubeSearch(pool, queryOrContinuation, options);
 		setTimeout(() => {
 			delete cache[key];
-		}, 3.6e6); // cache results for an hour
+		}, 1000*60*10); // 10 mins
 	}
 	return await cache[key];
 }
@@ -22,7 +22,6 @@ export async function cachedVRCYoutubeSearch(pool, queryOrContinuation, options)
 
 async function VRCYoutubeSearch(pool, queryOrContinuation, options = {}) {
 	console.debug("search:", queryOrContinuation);
-
 	var data = {results: []};
 
 	if (typeof queryOrContinuation == "object") {
@@ -31,10 +30,10 @@ async function VRCYoutubeSearch(pool, queryOrContinuation, options = {}) {
 		var search = await ytsr(queryOrContinuation, {safeSearch: true, pages: 1});
 	}
 	
-	console.debug(`raw:`, search);
 	//todo can we search videos only with `&sp=EgIQAQ%253D%253D` or does this code change?
 	//regular search seems to get almost as much videos
 	var results = search.items.filter(item => item.type == "video");
+	if (!results.length) console.warn("No results:", queryOrContinuation);
 
 	if (options.thumbnails) {
 		var thumbnailUrls = results.map(video => video.thumbnails?.[1]?.url || video.thumbnails?.[0]?.url);

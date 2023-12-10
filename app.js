@@ -59,5 +59,15 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 });
 
 
+router.get("/robots.txt", ctx => {
+	ctx.body = `User-agent: *\nDisallow: /`;
+});
+
+router.get("/", ctx => {
+	ctx.redirect("https://www.u2b.cx/");
+});
+
+
+
 app.use(router.routes());
 app.use(router.allowedMethods());

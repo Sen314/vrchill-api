@@ -40,15 +40,14 @@ async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
 export async function makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls) {
 	var num = await putVrcUrl(pool, {type: "imagesheet"});
 	var key = `${pool}:${num}`;
-	store[key] = createImageSheet(thumbnailUrls, iconUrls);
-	store[key].then(buf1 => {
+	var promise = createImageSheet(thumbnailUrls, iconUrls);
+	store[key] = promise;
+	promise.then(() => {
 		setTimeout(() => {
-			store[key].then(buf2 => {
-				if (buf2 === buf1) delete store[key];
-			});
-		}, 30000);
+			if (store[key] === promise) delete store[key];
+		}, 1000*60*10); // 10 mins;
 	});
-	store[key].catch(error => {
+	promise.catch(error => {
 		console.error(error.stack);
 	});
 	return num;
