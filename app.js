@@ -53,6 +53,7 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			break;
 		case "ytsr_continuation":
 			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuation, dest.options);
+			break;
 		default:
 			ctx.status = 500;
 	}
