@@ -32,6 +32,7 @@ JSON object:
 	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url
 	- `title`: (string) i.e. `"Nyan Cat! [Official]"`
 	- `id`: (string) YouTube video id i.e. `"2yJgwwDcgV8"`
+	- `description`: (string) short truncated description snippet i.e. `"http://nyan.cat/ Original song : http://momolabo.lolipop.jp/nyancatsong/Nyan/"`
 	- `lengthText`: (string) i.e. `"3:37"`
 	- `longLengthText`: (string) i.e. `"3 minutes, 37 seconds"`
 	- `viewCountText`: (string) i.e. `"2,552,243 views"`

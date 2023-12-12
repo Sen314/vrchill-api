@@ -8,9 +8,7 @@ export async function searchYouTubeVideos(query) {
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 
-	var videos = ytInitialData.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.find(x => x.itemSectionRenderer).itemSectionRenderer.contents;
-	videos = videos.filter(x => x.videoRenderer);
-	videos = videos.map(parseVideoRendererData);
+	var videos = ytInitialData.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.find(x => x.itemSectionRenderer?.contents.find(x => x.videoRenderer)).itemSectionRenderer.contents.filter(x => x.videoRenderer).map(parseVideoRendererData);
 
 	try {
 		var ytcfg = html.match(/ytcfg.set\(({.*})\);/)[1];
@@ -36,7 +34,7 @@ export async function continueYouTubeVideoSearch(continuationData) {
 		body: JSON.stringify(continuationData)
 	}).then(res => res.json());
 
-	var videos = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems.find(x => x.itemSectionRenderer).itemSectionRenderer.contents.filter(x => x.videoRenderer).map(parseVideoRendererData);
+	var videos = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems.find(x => x.itemSectionRenderer?.contents.find(x => x.videoRenderer)).itemSectionRenderer.contents.filter(x => x.videoRenderer).map(parseVideoRendererData);
 	var continuationToken = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems.find(x => x.continuationItemRenderer).continuationItemRenderer.continuationEndpoint.continuationCommand.token
 
 	return {
@@ -56,6 +54,7 @@ function parseVideoRendererData(data) {
 		id: data.videoId,
 		thumbnails: data.thumbnail?.thumbnails,
 		title: data.title?.runs?.[0]?.text,
+		description: data.detailedMetadataSnippets?.[0]?.snippetText?.runs?.reduce((str, obj) => str += obj.text, ""),
 		uploaded: data.publishedTimeText?.simpleText,
 		lengthText: data.lengthText?.simpleText,
 		longLengthText: data.lengthText?.accessibility?.accessibilityData?.label,
