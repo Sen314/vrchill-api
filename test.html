@@ -1,0 +1,46 @@
+<!DOCTYPE html><html><head>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<style>
+		img {
+			max-height: 100vh;
+		}
+	</style>
+</head><body>
+
+<label>search: <input id="input" type="text" value="nyan cat" /> <button id="start">start</button></label>
+
+<div id="output"></div>
+
+<button id="nextpage">next page</button>
+
+<script>
+
+var num = 0;
+var lastData;
+
+start.onclick = () => {
+	output.innerHTML = "";
+	loadData(`/search?pool=test1000&thumbnails=yes&icons=yes&input=${encodeURIComponent(input.value)}`);
+};
+nextpage.onclick = () => loadData(`/vrcurl/test1000/${lastData.nextpage_vrcurl}`);
+
+async function loadData(url) {
+	var data = await fetch(url).then(res => res.json());
+	var pre = document.createElement("pre");
+	pre.innerHTML = hljs.highlight(JSON.stringify(data, null, 4), {language: "json"}).value;
+	output.appendChild(pre);
+	var img = document.createElement("img");
+	img.src = `/vrcurl/test1000/${data.imagesheet_vrcurl}`;
+	output.appendChild(img);
+	lastData = data;
+}
+
+
+hljs.highlightAll();
+</script>
+
+
+
+
+</body></html>

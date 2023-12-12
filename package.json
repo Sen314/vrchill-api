@@ -5,7 +5,8 @@
 		"canvas": "^2.11.2",
 		"keyv": "^4.5.4",
 		"koa": "^2.14.2",
-		"ytsr": "^3.8.4"
+		"koa-send": "^5.0.1",
+		"node-fetch": "^3.3.2"
 	},
 	"type": "module"
 }

@@ -1,5 +1,8 @@
+# VRChat YouTube Search API
 
+An API server for building YouTube search UIs in VRChat, with pagination, thumbnails and channel icons.
 
+Test in browser: https://api.u2b.cx/test.html
 
 # Endpoints
 
@@ -27,15 +30,16 @@ JSON object:
 
 - `results`: Array of Object
 	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url
-	- `title`: (string)
-	- `id`: (string) YouTube video id
-	- `duration`: (string) video length i.e. `"3:03"`
-	- `durationString`: (string) DEPRECATED, same as duration
-	- `uploaded`: (string) when the video was uploaded i.e. `"12 years ago"`
-	- `views`: (integer)
+	- `title`: (string) i.e. `"Nyan Cat! [Official]"`
+	- `id`: (string) YouTube video id i.e. `"2yJgwwDcgV8"`
+	- `lengthText`: (string) i.e. `"3:37"`
+	- `longLengthText`: (string) i.e. `"3 minutes, 37 seconds"`
+	- `viewCountText`: (string) i.e. `"2,552,243 views"`
+	- `shortViewCountText`: (string) i.e. `"2.5M views"`
+	- `uploaded`: (string) i.e. `"12 years ago"`
 	- `channel`: (object)
-		- `name`: (string)
-		- `id`: (string)
+		- `name`: (string) i.e. `"NyanCat"`
+		- `id`: (string) i.e. `"UCsW85RAS2_Twg_lEPyv7G8A"`
 		- `icon_index`?: (string) The index of the channel icon in the image sheet. because it is deduplicated, it is not one-to-one
 - `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
 - `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results

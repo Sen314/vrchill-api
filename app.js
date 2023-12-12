@@ -1,6 +1,7 @@
 import Koa from "koa";
 import Router from "@koa/router";
-import { cachedVRCYoutubeSearch } from "./ytsearch.js";
+import send from "koa-send";
+import { cachedVRCYoutubeSearch } from "./VRCYoutubeSearch.js"
 import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
 import { stringToBoolean } from "./util.js";
@@ -51,8 +52,8 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			ctx.body = buf;
 			ctx.type = "image/jpeg";
 			break;
-		case "ytsr_continuation":
-			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuation, dest.options);
+		case "ytContinuation":
+			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuationData, dest.options);
 			break;
 		default:
 			ctx.status = 500;
@@ -62,6 +63,10 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 
 router.get("/robots.txt", ctx => {
 	ctx.body = `User-agent: *\nDisallow: /`;
+});
+
+router.get("/test.html", async ctx => {
+	await send(ctx, "test.html");
 });
 
 router.get("/", ctx => {
