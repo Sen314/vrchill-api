@@ -30,13 +30,14 @@ JSON object:
 
 - `results`: Array of Object
 	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url
+	- `live`: (boolean) whether it's a live stream
 	- `title`: (string) i.e. `"Nyan Cat! [Official]"`
 	- `id`: (string) YouTube video id i.e. `"2yJgwwDcgV8"`
 	- `description`: (string) short truncated description snippet i.e. `"http://nyan.cat/ Original song : http://momolabo.lolipop.jp/nyancatsong/Nyan/"`
-	- `lengthText`: (string) i.e. `"3:37"`
-	- `longLengthText`: (string) i.e. `"3 minutes, 37 seconds"`
-	- `viewCountText`: (string) i.e. `"2,552,243 views"`
-	- `shortViewCountText`: (string) i.e. `"2.5M views"`
+	- `lengthText`?: (string) i.e. `"3:37"`
+	- `longLengthText`?: (string) i.e. `"3 minutes, 37 seconds"`
+	- `viewCountText`: (string) i.e. `"2,552,243 views"` or `"575 watching"` for live streams
+	- `shortViewCountText`?: (string) i.e. `"2.5M views"`
 	- `uploaded`: (string) i.e. `"12 years ago"`
 	- `channel`: (object)
 		- `name`: (string) i.e. `"NyanCat"`

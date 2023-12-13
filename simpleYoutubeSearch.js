@@ -52,13 +52,14 @@ function parseVideoRendererData(data) {
 	data = data.videoRenderer;
 	return {
 		id: data.videoId,
-		thumbnails: data.thumbnail?.thumbnails,
+		live: Boolean(data.badges?.find(x => x.metadataBadgeRenderer?.style == "BADGE_STYLE_TYPE_LIVE_NOW")),
 		title: data.title?.runs?.[0]?.text,
 		description: data.detailedMetadataSnippets?.[0]?.snippetText?.runs?.reduce((str, obj) => str += obj.text, ""),
+		thumbnails: data.thumbnail?.thumbnails,
 		uploaded: data.publishedTimeText?.simpleText,
 		lengthText: data.lengthText?.simpleText,
 		longLengthText: data.lengthText?.accessibility?.accessibilityData?.label,
-		viewCountText: data.viewCountText?.simpleText,
+		viewCountText: data.viewCountText?.runs ? data.viewCountText.runs.reduce((str, obj) => str += obj.text, "") : data.viewCountText?.simpleText,
 		shortViewCountText: data.shortViewCountText?.simpleText,
 		channel: {
 			name: data.ownerText?.runs?.[0]?.text,
