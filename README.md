@@ -42,7 +42,16 @@ JSON object:
 	- `channel`: (object)
 		- `name`: (string) i.e. `"NyanCat"`
 		- `id`: (string) i.e. `"UCsW85RAS2_Twg_lEPyv7G8A"`
-		- `icon_index`?: (string) The index of the channel icon in the image sheet. because it is deduplicated, it is not one-to-one
+		- `icon`?: (object)
+			- `x`: (integer) px from left
+			- `y`: (integer) px from top
+			- `width`: (integer)
+			- `height`: (integer)
+	- `thumbnail`?: (object)
+		- `x`: (integer) px from left
+		- `y`: (integer) px from top
+		- `width`: (integer)
+		- `height`: (integer)
 - `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
 - `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results
 
@@ -52,7 +61,7 @@ JSON object:
 - `{pool}`: must be same as pool param in search endpoint.
 - `{index}`: vrcurl index number
 
-Response may be 302 redirect to youtube url, `image/jpeg` for imagesheet or `application/json` for next page
+Response may be 302 redirect to youtube url, `image/png` for imagesheet or `application/json` for next page
 
 # VRCUrls
 
@@ -77,6 +86,4 @@ All resources (youtube urls etc) referenced in the search results will be substi
 
 Video thumbnails and channel icons are collated together into one image and served at a VRCUrl to be loaded by VRCImageDownloader.
 
-Thumbnails are 360x202, arranged vertically in the same order as the JSON results.
-
-Channel icons are 68x68 arranged vertically on the right of thumbnails.
+Use the x, y, width and height values from the json to crop the image from the sheet.

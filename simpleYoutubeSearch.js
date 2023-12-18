@@ -55,7 +55,7 @@ function parseVideoRendererData(data) {
 		live: Boolean(data.badges?.find(x => x.metadataBadgeRenderer?.style == "BADGE_STYLE_TYPE_LIVE_NOW")),
 		title: data.title?.runs?.[0]?.text,
 		description: data.detailedMetadataSnippets?.[0]?.snippetText?.runs?.reduce((str, obj) => str += obj.text, ""),
-		thumbnails: data.thumbnail?.thumbnails,
+		thumbnailUrl: data.thumbnail?.thumbnails?.find(x => x.width == 360 && x.height == 202)?.url || data.thumbnail?.thumbnails?.[0]?.url,
 		uploaded: data.publishedTimeText?.simpleText,
 		lengthText: data.lengthText?.simpleText,
 		longLengthText: data.lengthText?.accessibility?.accessibilityData?.label,

@@ -1,6 +1,6 @@
 import { searchYouTubeVideos, continueYouTubeVideoSearch } from "./simpleYoutubeSearch.js";
 import { putVrcUrl } from "./vrcurl.js";
-import { makeImageSheetVrcUrl } from "./imagesheet.js";
+import { makeImageSheetVrcUrl, thumbnailWidth, thumbnailHeight, iconWidth, iconHeight } from "./imagesheet.js";
 
 var cache = {};
 
@@ -27,7 +27,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	var {videos, continuationData} = typeof query == "object" ? await continueYouTubeVideoSearch(query) : await searchYouTubeVideos(query);
 
 	if (options.thumbnails) {
-		var thumbnailUrls = videos.map(video => video.thumbnails.find(x => x.width == 360 && x.height == 202)?.url || video.thumbnails[0]?.url);
+		var thumbnailUrls = videos.map(video => video.thumbnailUrl);
 	}
 
 	if (options.icons) {
@@ -38,15 +38,37 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 		iconUrls = [...iconUrls];
 	}
 
+	if (thumbnailUrls || iconUrls) {
+		var {vrcurl: imagesheet_vrcurl, thumbnails, icons} = await makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls);
+		data.imagesheet_vrcurl = imagesheet_vrcurl;
+	}
+
 	for (let video of videos) {
 		video.vrcurl = await putVrcUrl(pool, {type: "redirect", url: `https://www.youtube.com/watch?v=${video.id}`});
-		video.channel.icon_index = iconUrls?.indexOf(video.channel.iconUrl);
-		delete video.thumbnails;
+		if (thumbnails?.length) {
+			let thumbnail = thumbnails.find(x => x.url == video.thumbnailUrl);
+			video.thumbnail = {
+				x: thumbnail?.x,
+				y: thumbnail?.y,
+				width: thumbnailWidth,
+				height: thumbnailHeight
+			};
+		}
+		if (icons?.length) {
+			let icon = icons.find(x => x.url == video.channel.iconUrl);
+			video.channel.icon = {
+				x: icon?.x,
+				y: icon?.y,
+				width: iconWidth,
+				height: iconHeight
+			};
+		}
+		delete video.thumbnailUrl;
 		delete video.channel.iconUrl;
 		data.results.push(video);
 	}
 
-	if (thumbnailUrls || iconUrls) data.imagesheet_vrcurl = await makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls);
+	
 
 	data.nextpage_vrcurl = await putVrcUrl(pool, {
 		type: "ytContinuation",

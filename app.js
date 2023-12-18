@@ -50,7 +50,7 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 				return;
 			}
 			ctx.body = buf;
-			ctx.type = "image/jpeg";
+			ctx.type = "image/png";
 			break;
 		case "ytContinuation":
 			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuationData, dest.options);
