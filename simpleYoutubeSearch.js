@@ -8,7 +8,8 @@ export async function searchYouTubeVideos(query) {
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 
-	var videos = ytInitialData.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.find(x => x.itemSectionRenderer?.contents.find(x => x.videoRenderer)).itemSectionRenderer.contents.filter(x => x.videoRenderer).map(parseVideoRendererData);
+	var videos = ytInitialData?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.find(x => x.itemSectionRenderer?.contents?.find(x => x.videoRenderer))?.itemSectionRenderer?.contents?.filter(x => x.videoRenderer).map(parseVideoRendererData);
+	if (!videos) return {videos: []};
 
 	try {
 		var ytcfg = html.match(/ytcfg.set\(({.*})\);/)[1];

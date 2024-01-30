@@ -70,7 +70,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 
 	
 
-	data.nextpage_vrcurl = await putVrcUrl(pool, {
+	if (continuationData) data.nextpage_vrcurl = await putVrcUrl(pool, {
 		type: "ytContinuation",
 		continuationData,
 		options
