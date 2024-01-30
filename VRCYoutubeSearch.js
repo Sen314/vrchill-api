@@ -38,9 +38,13 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 		iconUrls = [...iconUrls];
 	}
 
-	if (thumbnailUrls || iconUrls) {
-		var {vrcurl: imagesheet_vrcurl, thumbnails, icons} = await makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls);
-		data.imagesheet_vrcurl = imagesheet_vrcurl;
+	if (thumbnailUrls?.length || iconUrls?.length) {
+		try {
+			var {vrcurl: imagesheet_vrcurl, thumbnails, icons} = await makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls);
+			data.imagesheet_vrcurl = imagesheet_vrcurl;
+		} catch (error) {
+			console.error(error.stack);
+		}
 	}
 
 	for (let video of videos) {
