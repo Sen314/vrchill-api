@@ -21,7 +21,7 @@ export async function cachedVRCYoutubeSearch(pool, queryOrContinuation, options)
 
 
 async function VRCYoutubeSearch(pool, query, options = {}) {
-	console.debug("search:", query);
+	console.debug("search:", JSON.stringify(query));
 	var data = {results: []};
 
 	var {videos, continuationData} = typeof query == "object" ? await continueYouTubeVideoSearch(query) : await searchYouTubeVideos(query);
