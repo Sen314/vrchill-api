@@ -75,5 +75,23 @@ router.get("/", ctx => {
 
 
 
+// work around vrchat json parser bug https://feedback.vrchat.com/udon/p/braces-inside-strings-in-vrcjson-can-fail-to-deserialize
+app.use(async (ctx, next) => {
+	await next();
+	if (ctx.type != "application/json") return;
+	ctx.body = structuredClone(ctx.body);
+	(function iterateObject(obj) {
+		for (var key in obj) {
+			if (typeof obj[key] == "string") {
+				obj[key] = obj[key].replace(/[\[\]{}]/g, chr => "\\u" + chr.charCodeAt(0).toString(16).padStart(4, '0'));
+			} else if (typeof obj[key] == "object") {
+				iterateObject(obj[key]);
+			}
+		}
+	})(ctx.body);
+	ctx.body = JSON.stringify(ctx.body).replaceAll("\\\\u", "\\u");
+	ctx.type = "json";
+});
+
 app.use(router.routes());
 app.use(router.allowedMethods());
