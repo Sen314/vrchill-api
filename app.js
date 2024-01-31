@@ -26,15 +26,10 @@ router.get("/search", async ctx => {
 
 	var options = {
 		thumbnails: stringToBoolean(ctx.query.thumbnails),
-		icons: stringToBoolean(ctx.query.icons),
-		ascii: stringToBoolean(ctx.query.ascii)
+		icons: stringToBoolean(ctx.query.icons)
 	};
 
 	ctx.body = await cachedVRCYoutubeSearch(ctx.query.pool, query, options);
-
-	if (options.ascii) {
-		ctx.body = JSON.stringify(ctx.body).replace(/[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4));
-	}
 });
 
 
