@@ -17,6 +17,7 @@ Test in browser: https://api.u2b.cx/test.html
 
 - `thumbnails`: set to `1`, `true`, `yes`, `on` or whatever to load thumbnails
 - `icons`: set to `1`, `true`, `yes`, `on` or whatever to load channel icons
+- `captions`: set to `1`, `true`, `yes`, `on` or whatever if you need access to closed captioning data
 
 ### Example URL
 
@@ -52,6 +53,7 @@ JSON object:
 		- `y`: (integer) px from top
 		- `width`: (integer)
 		- `height`: (integer)
+	- `captions_vrcurl`?: (integer) index of vrcurl to get the caption data json
 - `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
 - `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results
 
@@ -61,7 +63,17 @@ JSON object:
 - `{pool}`: must be same as pool param in search endpoint.
 - `{index}`: vrcurl index number
 
-Response may be 302 redirect to youtube url, `image/png` for imagesheet or `application/json` for next page
+Response may be 302 redirect to youtube url, `image/png` for imagesheet, `application/json` for next page (see response format above) or caption data:
+
+### Caption JSON format
+
+- Array of Object
+	- `name`: (string) caption track name like "English" or "English (auto-generated)"
+	- `id`: (string) id like `.en` or `a.en`
+	- `lines`: Array of Object
+		- `start`: (float) video seconds when the caption is displayed
+		- `dur`: (float) seconds to display the caption
+		- `text`: (string) caption text
 
 # VRCUrls
 

@@ -12,6 +12,7 @@
 	<label>search: <input id="input" type="text" value="nyan cat" /></label>
 	<label><input id="thumbnails" type="checkbox" checked>thumbnails</label>
 	<label><input id="icons" type="checkbox" checked>icons</label>
+	<label><input id="captions" type="checkbox" checked>captions</label>
 	<button id="start">start</button>
 </div>
 
@@ -26,7 +27,7 @@ var lastData;
 
 start.onclick = () => {
 	output.innerHTML = "";
-	loadData(`/search?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&input=${encodeURIComponent(input.value)}`);
+	loadData(`/search?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&captions=${captions.checked}&input=${encodeURIComponent(input.value)}`);
 };
 nextpage.onclick = () => loadData(`/vrcurl/test1000/${lastData.nextpage_vrcurl}`);
 

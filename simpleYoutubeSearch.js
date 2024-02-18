@@ -1,5 +1,3 @@
-var fetch = global.fetch || (await import("node-fetch")).default;
-
 
 export async function searchYouTubeVideos(query) {
 	var url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.replaceAll(' ', '+'))}&sp=EgIQAQ%253D%253D`;
@@ -69,16 +67,3 @@ function parseVideoRendererData(data) {
 		}
 	};
 }
-
-
-
-/*
-var page1 = await searchYouTubeVideos("test video");
-console.log("page1", page1);
-var page2 = await continueYouTubeVideoSearch(page1.continuationData);
-console.log("page2", page2);
-var page3 = await continueYouTubeVideoSearch(page2.continuationData);
-console.log("page3", page3);
-console.log("videos", [...page1.videos, ...page2.videos, ...page3.videos]);
-debugger;
-*/

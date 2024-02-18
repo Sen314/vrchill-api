@@ -67,12 +67,13 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 				height: iconHeight
 			};
 		}
+		if (options.captions) {
+			video.captions_vrcurl = await putVrcUrl(pool, {type: "captions", videoId: video.id});
+		}
 		delete video.thumbnailUrl;
 		delete video.channel.iconUrl;
 		data.results.push(video);
 	}
-
-	
 
 	if (continuationData) data.nextpage_vrcurl = await putVrcUrl(pool, {
 		type: "ytContinuation",

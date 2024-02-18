@@ -4,6 +4,7 @@ import send from "koa-send";
 import { cachedVRCYoutubeSearch } from "./VRCYoutubeSearch.js"
 import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
+import { getVideoCaptionsCached } from "./captions.js";
 import { stringToBoolean } from "./util.js";
 
 export var app = new Koa();
@@ -26,7 +27,8 @@ router.get("/search", async ctx => {
 
 	var options = {
 		thumbnails: stringToBoolean(ctx.query.thumbnails),
-		icons: stringToBoolean(ctx.query.icons)
+		icons: stringToBoolean(ctx.query.icons),
+		captions: stringToBoolean(ctx.query.captions)
 	};
 
 	ctx.body = await cachedVRCYoutubeSearch(ctx.query.pool, query, options);
@@ -54,6 +56,9 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			break;
 		case "ytContinuation":
 			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuationData, dest.options);
+			break;
+		case "captions":
+			ctx.body = await getVideoCaptionsCached(dest.videoId);
 			break;
 		default:
 			ctx.status = 500;
@@ -90,7 +95,6 @@ app.use(async (ctx, next) => {
 		}
 	})(ctx.body);
 	ctx.body = JSON.stringify(ctx.body).replaceAll("\\\\u", "\\u");
-	ctx.type = "json";
 });
 
 app.use(router.routes());
