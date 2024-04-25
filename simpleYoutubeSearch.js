@@ -1,3 +1,4 @@
+import { parseVideoRendererData } from "./util.js";
 
 export async function searchYouTubeVideos(query) {
 	var url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.replaceAll(' ', '+'))}&sp=EgIQAQ%253D%253D`;
@@ -43,27 +44,4 @@ export async function continueYouTubeVideoSearch(continuationData) {
 			continuation: continuationToken
 		}
 	}
-}
-
-
-
-function parseVideoRendererData(data) {
-	data = data.videoRenderer;
-	return {
-		id: data.videoId,
-		live: Boolean(data.badges?.find(x => x.metadataBadgeRenderer?.style == "BADGE_STYLE_TYPE_LIVE_NOW")),
-		title: data.title?.runs?.[0]?.text,
-		description: data.detailedMetadataSnippets?.[0]?.snippetText?.runs?.reduce((str, obj) => str += obj.text, ""),
-		thumbnailUrl: data.thumbnail?.thumbnails?.find(x => x.width == 360 && x.height == 202)?.url || data.thumbnail?.thumbnails?.[0]?.url,
-		uploaded: data.publishedTimeText?.simpleText,
-		lengthText: data.lengthText?.simpleText,
-		longLengthText: data.lengthText?.accessibility?.accessibilityData?.label,
-		viewCountText: data.viewCountText?.runs ? data.viewCountText.runs.reduce((str, obj) => str += obj.text, "") : data.viewCountText?.simpleText,
-		shortViewCountText: data.shortViewCountText?.simpleText,
-		channel: {
-			name: data.ownerText?.runs?.[0]?.text,
-			id: data.ownerText?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId,
-			iconUrl: data.channelThumbnailSupportedRenderers?.channelThumbnailWithLinkRenderer?.thumbnail?.thumbnails?.[0]?.url
-		}
-	};
 }
