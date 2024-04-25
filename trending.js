@@ -5,6 +5,14 @@ export async function getTrending() {
 	var html = await fetch(url).then(res => res.text());
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
+
+	var tabs = ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs.map(t => {
+		return {
+			name: t.tabRenderer.title,
+			url: `https://www.youtube.com` + t.tabRenderer.endpoint.commandMetadata.webCommandMetadata.url
+		}
+	});
+
 	var videos = ytInitialData
 		.contents
 		.twoColumnBrowseResultsRenderer
@@ -25,7 +33,7 @@ export async function getTrending() {
 			};
 		})
 		.flat();
-	return videos;
-}
 
-console.log(JSON.stringify(await getTrending(),null,4))
+
+	return {tabs, videos};
+}

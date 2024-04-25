@@ -11,8 +11,8 @@ export var app = new Koa();
 var router = new Router();
 
 
-router.get("/search", async ctx => {
-	var query = ctx.query.input?.replace(/^.*→/, '').trim();
+router.get(["/search", "/trending"], async ctx => {
+	var query = ctx.path == "/trending" ? "trending" : ctx.query.input?.replace(/^.*→/, '').trim();
 	if (!query) {
 		ctx.status = 400;
 		ctx.body = "missing search query";

@@ -11,9 +11,10 @@ export const iconHeight = 68;
 const maxSheetWidth = 2048;
 const maxSheetHeight = 2048;
 const maxThumbnailRowLen = Math.floor(maxSheetWidth / thumbnailWidth); // 5
-const maxThumbnailColLen = Math.floor(maxSheetHeight / thumbnailHeight); // 10
-const maxIconRowLen = Math.floor(maxSheetWidth / iconWidth); // 30
-const maxIconColLen = Math.floor(maxSheetHeight / iconHeight); // 30
+//const maxThumbnailColLen = Math.floor(maxSheetHeight / thumbnailHeight); // 10
+//const maxIconRowLen = Math.floor(maxSheetWidth / iconWidth); // 30
+const maxIconRowLen = 3;
+//const maxIconColLen = Math.floor(maxSheetHeight / iconHeight); // 30
 
 
 async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
@@ -25,19 +26,19 @@ async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
 		return {x, y, url};
 	});
 
-	const iconStartY = thumbnails.length ? thumbnails.at(-1).y + thumbnailHeight : 0;
+	const iconStartX = thumbnailWidth * Math.min(maxThumbnailRowLen, thumbnails.length);
 
 	var icons = iconUrls.map((url, index) => {
-		const x = index % maxIconRowLen * iconWidth;
-		const y = iconStartY + Math.floor(index / maxIconRowLen);
+		const x = iconStartX + index % maxIconRowLen * iconWidth;
+		const y = Math.floor(index / maxIconRowLen) * iconHeight;
 		return {x, y, url};
 	});
 
 	const canvasWidth = Math.max(
 		Math.min(thumbnails.length, maxThumbnailRowLen) * thumbnailWidth,
-		Math.min(icons.length, maxIconRowLen) * iconWidth
+		iconStartX + Math.min(icons.length, maxIconRowLen) * iconWidth
 	);
-	const canvasHeight = icons.length ? icons.at(-1).y + iconHeight : thumbnails.length ? thumbnails.at(-1).y + thumbnailHeight : 0;
+	const canvasHeight = Math.max(thumbnails.length ? thumbnails.at(-1).y + thumbnailHeight : 0, icons.length ? icons.at(-1)?.y + iconHeight : 0);
 
 	var canvas = createCanvas(Math.min(maxSheetWidth, canvasWidth), Math.min(maxSheetHeight, canvasHeight));
 	var ctx = canvas.getContext('2d');

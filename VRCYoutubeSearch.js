@@ -1,6 +1,7 @@
 import { searchYouTubeVideos, continueYouTubeVideoSearch } from "./simpleYoutubeSearch.js";
 import { putVrcUrl } from "./vrcurl.js";
 import { makeImageSheetVrcUrl, thumbnailWidth, thumbnailHeight, iconWidth, iconHeight } from "./imagesheet.js";
+import { getTrending } from "./trending.js";
 
 var cache = {};
 
@@ -24,8 +25,19 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	console.debug("search:", JSON.stringify(query));
 	var data = {results: []};
 
-	var {videos, continuationData} = typeof query == "object" ? await continueYouTubeVideoSearch(query) : await searchYouTubeVideos(query);
-
+	if (query == "trending") {
+		var {videos, tabs} = await getTrending();
+		data.tabs = [];
+		for (let tab of tabs) {
+			data.tabs.push({
+				name: tab.name,
+				vrcurl: await putVrcUrl(pool, {type: "trending", url: tab.url})
+			});
+		}
+	} else {
+		var {videos, continuationData} = typeof query == "object" ? await continueYouTubeVideoSearch(query) : await searchYouTubeVideos(query);
+	}
+	
 	if (options.thumbnails) {
 		var thumbnailUrls = videos.map(video => video.thumbnailUrl);
 	}
