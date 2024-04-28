@@ -7,10 +7,10 @@ var cache = {};
 
 
 
-export async function cachedVRCYoutubeSearch(pool, queryOrContinuation, options) {
-	var key = JSON.stringify([pool, queryOrContinuation, options]);
+export async function cachedVRCYoutubeSearch(pool, query, options) {
+	var key = JSON.stringify([pool, query, options]);
 	if (!cache[key]) {
-		cache[key] = VRCYoutubeSearch(pool, queryOrContinuation, options);
+		cache[key] = VRCYoutubeSearch(pool, query, options);
 		setTimeout(() => {
 			delete cache[key];
 		}, 1000*60*10); // 10 mins
@@ -25,17 +25,24 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	console.debug("search:", JSON.stringify(query));
 	var data = {results: []};
 
-	if (query == "trending") {
-		var {videos, tabs} = await getTrending();
-		data.tabs = [];
-		for (let tab of tabs) {
-			data.tabs.push({
-				name: tab.name,
-				vrcurl: await putVrcUrl(pool, {type: "trending", url: tab.url})
-			});
+	if (typeof query == "object") {
+		switch (query.type) {
+			case "trending":
+				var {videos, tabs} = await getTrending(query.bp);
+				data.tabs = [];
+				for (let tab of tabs) {
+					data.tabs.push({
+						name: tab.name,
+						vrcurl: await putVrcUrl(pool, {type: "trending", bp: tab.bp})
+					});
+				}
+				break;
+			case "continuation":
+				var {videos, continuationData} = await continueYouTubeVideoSearch(query.continuationData);
+				break;
 		}
 	} else {
-		var {videos, continuationData} = typeof query == "object" ? await continueYouTubeVideoSearch(query) : await searchYouTubeVideos(query);
+		var {videos, continuationData} = searchYouTubeVideos(query);
 	}
 	
 	if (options.thumbnails) {

@@ -12,7 +12,7 @@ var router = new Router();
 
 
 router.get(["/search", "/trending"], async ctx => {
-	var query = ctx.path == "/trending" ? "trending" : ctx.query.input?.replace(/^.*→/, '').trim();
+	var query = ctx.path == "/trending" ? {"type":"trending"} : ctx.query.input?.replace(/^.*→/, '').trim();
 	if (!query) {
 		ctx.status = 400;
 		ctx.body = "missing search query";
@@ -55,12 +55,16 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			ctx.type = "image/png";
 			break;
 		case "ytContinuation":
-			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, dest.continuationData, dest.options);
+			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "continuation", continuationData: dest.continuationData}, dest.options);
+			break;
+		case "trending":
+			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "trending", bp: dest.bp}, dest.options);
 			break;
 		case "captions":
 			ctx.body = await getVideoCaptionsCached(dest.videoId);
 			break;
 		default:
+			console.error("unknown vrcurl type", dest.type);
 			ctx.status = 500;
 	}
 });

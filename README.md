@@ -8,6 +8,8 @@ Test in browser: https://api.u2b.cx/test.html
 
 ## GET `/search`
 
+Get YouTube videos for a search query.
+
 ### Required query parameters
 
 - `pool`: id of the VRCUrl pool, only letters numbers hyphens or underscores, optionally followed by an integer for pool size.
@@ -58,12 +60,20 @@ JSON object:
 - `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results
 
 
+## GET `/trending`
+
+Gets Trending YouTube videos. Identical to `/search` but without `input` parameter, and response includes additional field:
+
+- `tabs`: Array of Object
+	- `name`: (string) Tab title ("Now", "Music", "Gaming", "Movies")
+	- `vrcurl`: (integer) index of vrcurl to load that tab (same response format)
+
 ## GET `/vrcurl/{pool}/{index}`
 
 - `{pool}`: must be same as pool param in search endpoint.
 - `{index}`: vrcurl index number
 
-Response may be 302 redirect to youtube url, `image/png` for imagesheet, `application/json` for next page (see response format above) or caption data:
+Response may be 302 redirect to youtube url, `image/png` for imagesheet, `application/json` for next page (see response format above) or trending tab or caption data (below).
 
 ### Caption JSON format
 
