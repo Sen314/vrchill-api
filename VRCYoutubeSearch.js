@@ -42,7 +42,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 				break;
 		}
 	} else {
-		var {videos, continuationData} = searchYouTubeVideos(query);
+		var {videos, continuationData} = await searchYouTubeVideos(query);
 	}
 	
 	if (options.thumbnails) {
