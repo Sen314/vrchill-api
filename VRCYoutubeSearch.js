@@ -33,7 +33,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 				for (let tab of tabs) {
 					data.tabs.push({
 						name: tab.name,
-						vrcurl: await putVrcUrl(pool, {type: "trending", bp: tab.bp})
+						vrcurl: await putVrcUrl(pool, {type: "trending", bp: tab.bp, options})
 					});
 				}
 				break;
