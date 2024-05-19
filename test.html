@@ -9,24 +9,26 @@
 </head><body>
 
 <div>
-	<label>search: <input id="input" type="text" value="nyan cat" /></label>
-	<button id="trending">trending</button>
+	<label><button id="search">search:</button> <input id="input" type="text" value="nyan cat" /></label>
+	<br /><button id="trending">trending</button>
+	<br />
 	<label><input id="thumbnails" type="checkbox" checked>thumbnails</label>
 	<label><input id="icons" type="checkbox" checked>icons</label>
 	<label><input id="captions" type="checkbox" checked>captions</label>
-	<button id="start">start</button>
 </div>
 
 <div id="output"></div>
 
-<button id="nextpage">next page</button>
+
+<div id="buttons"></div>
+<button id="nextpage" style="display: none">next page</button>
 
 <script>
 
 var num = 0;
 var lastData;
 
-start.onclick = () => {
+search.onclick = () => {
 	output.innerHTML = "";
 	loadData(`/search?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&captions=${captions.checked}&input=${encodeURIComponent(input.value)}`);
 };
@@ -34,9 +36,9 @@ trending.onclick = () => {
 	output.innerHTML = "";
 	loadData(`/trending?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&captions=${captions.checked}`);
 }
-nextpage.onclick = () => loadData(`/vrcurl/test1000/${lastData.nextpage_vrcurl}`);
 
 async function loadData(url) {
+	buttons.innerHTML = '';
 	var data = await fetch(url).then(res => res.json());
 	var pre = document.createElement("pre");
 	pre.innerHTML = hljs.highlight(JSON.stringify(data, null, 4), {language: "json"}).value;
@@ -44,6 +46,12 @@ async function loadData(url) {
 	var img = document.createElement("img");
 	img.src = `/vrcurl/test1000/${data.imagesheet_vrcurl}`;
 	output.appendChild(img);
+	if (data.nextpage_vrcurl) {
+		buttons.innerHTML = `<button onclick="loadData('/vrcurl/test1000/${data.nextpage_vrcurl}')">next page</button>`;
+	}
+	if (data.tabs) {
+		buttons.innerHTML = data.tabs.map(t => `<button onclick="loadData('/vrcurl/test1000/${t.vrcurl}')">${t.name}</button>`).join('');
+	}
 	lastData = data;
 }
 
