@@ -6,6 +6,7 @@ import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
 import { getVideoCaptionsCached } from "./captions.js";
 import { stringToBoolean } from "./util.js";
+import shorturlmap from "./shorturlmap.json" assert { type: "json" };
 
 export var app = new Koa();
 var router = new Router();
@@ -84,6 +85,22 @@ router.get("/", ctx => {
 
 
 
+
+
+// short urls to work around https://feedback.vrchat.com/udon/p/vrcurlinputfield-incorrect-focus-issue-on-quest
+app.use(async (ctx, next) => {
+	var subdomain = ctx.hostname.match(/(.*).u2b.cx$/i)?.[1];
+	if (subdomain && !["api","api2","dev"].includes(subdomain)) {
+		if (shorturlmap[subdomain]) {
+			ctx.url = shorturlmap[subdomain] + ctx.url.slice(1);
+		} else {
+			ctx.status = 404;
+			return;
+		}
+	}
+	await next();
+});
+
 // work around vrchat json parser bug https://feedback.vrchat.com/udon/p/braces-inside-strings-in-vrcjson-can-fail-to-deserialize
 app.use(async (ctx, next) => {
 	await next();
@@ -100,6 +117,7 @@ app.use(async (ctx, next) => {
 	})(ctx.body);
 	ctx.body = JSON.stringify(ctx.body).replaceAll("\\\\u", "\\u");
 });
+
 
 app.use(router.routes());
 app.use(router.allowedMethods());
