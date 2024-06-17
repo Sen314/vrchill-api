@@ -22,7 +22,7 @@ export async function cachedVRCYoutubeSearch(pool, query, options) {
 
 
 async function VRCYoutubeSearch(pool, query, options = {}) {
-	console.debug("search:", JSON.stringify(query));
+	console.log("search:", JSON.stringify(query));
 	var data = {results: []};
 
 	if (typeof query == "object") {
@@ -48,7 +48,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 		}
 	} else {
 		var playlistId = query.match(/list=(PL[a-zA-Z0-9-_]{32})/)?.[1];
-		if (playlistId) console.debug("playlistId:", playlistId);
+		if (playlistId) console.log("playlistId:", playlistId);
 		var {videos, continuationData} = playlistId ? await getYouTubePlaylist(playlistId) : await searchYouTubeVideos(query);
 	}
 	

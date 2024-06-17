@@ -6,9 +6,11 @@ export async function searchYouTubeVideos(query) {
 
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
+	console.debug(ytInitialData);
 
 	var videos = ytInitialData?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.find(x => x.itemSectionRenderer?.contents?.find(x => x.videoRenderer))?.itemSectionRenderer?.contents?.filterMap(x => x.videoRenderer)?.map(parseVideoRendererData);
 	if (!videos) return {videos: []};
+	console.debug(videos.length, "results");
 
 	try {
 		var ytcfg = html.match(/ytcfg.set\(({.*})\);/)[1];
@@ -33,10 +35,13 @@ export async function continueYouTubeVideoSearch(continuationData) {
 		},
 		body: JSON.stringify(continuationData)
 	}).then(res => res.json());
+	console.debug(data);
 
 	var continuationItems = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems;
 	var videos = continuationItems.find(x => x.itemSectionRenderer?.contents.find(x => x.videoRenderer)).itemSectionRenderer.contents.filterMap(x => x.videoRenderer).map(parseVideoRendererData);
 	var continuationToken = continuationItems.find(x => x.continuationItemRenderer)?.continuationItemRenderer.continuationEndpoint.continuationCommand.token
+	console.debug(videos.length, "results");
+
 
 	return {
 		videos,
@@ -53,10 +58,12 @@ export async function getYouTubePlaylist(playlistId) {
 	var html = await fetch("https://www.youtube.com/playlist?list=" + playlistId).then(res => res.text());
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
+	console.debug(ytInitialData);
 
 	var sectionListRendererContents = ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs.find(tab => tab.tabRenderer.selected).tabRenderer.content.sectionListRenderer.contents;
 	var videos = sectionListRendererContents.find(x => x.itemSectionRenderer).itemSectionRenderer.contents.find(x => x.playlistVideoListRenderer).playlistVideoListRenderer.contents.filterMap(x => x.playlistVideoRenderer).map(parseVideoRendererData);
 	if (!videos) return {videos: []};
+	console.debug(videos.length, "results");
 
 	try {
 		var ytcfg = html.match(/ytcfg.set\(({.*})\);/)[1];
@@ -78,11 +85,13 @@ export async function continueYouTubePlaylist(continuationData) {
 		headers: {"Content-Type": "application/json"},
 		body: JSON.stringify(continuationData)
 	}).then(res => res.json());
+	console.debug(data);
 
 	if (!data.onResponseReceivedActions) return {videos:[]};
 	var continuationItems = data.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems;
 	var videos = continuationItems.find(x => x.itemSectionRenderer).itemSectionRenderer.contents.filterMap(x => x.playlistVideoListRenderer).map(parseVideoRendererData);
 	var continuationToken = continuationItems.find(x => x.continuationItemRenderer)?.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
+	console.debug(videos.length, "results");
 
 	return {
 		videos,

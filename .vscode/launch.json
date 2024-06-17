@@ -14,7 +14,10 @@
 			"program": "${workspaceFolder}\\index.js",
 			"outFiles": [
 				"${workspaceFolder}/**/*.js"
-			]
+			],
+			"env": {
+				"D":"BUG"
+			}
 		}
 	]
 }

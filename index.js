@@ -1,3 +1,4 @@
+if (process.env.D!="BUG") console.debug = () => {};
 import "./util.js";
 import { app } from "./app.js";
 
