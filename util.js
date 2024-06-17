@@ -40,7 +40,12 @@ export function parseVideoRendererData(data) {
 		description: data.detailedMetadataSnippets?.[0]?.snippetText?.runs?.concatRunsText() 
 			|| data.descriptionSnippet?.runs?.concatRunsText(),
 		//thumbnailUrl: data.thumbnail?.thumbnails?.find(x => (x.width == 360 && x.height == 202) || (x.width == 246 && x.height == 138))?.url || data.thumbnail?.thumbnails?.[0]?.url,
-		thumbnail: data.thumbnail?.thumbnails?.find(x => (x.width == 360 && x.height == 202) || (x.width == 246 && x.height == 138)) || data.thumbnail?.thumbnails?.[0],
+		//thumbnail: data.thumbnail?.thumbnails?.find(x => (x.width == 360 && x.height == 202) || (x.width == 246 && x.height == 138)) || data.thumbnail?.thumbnails?.[0],
+		thumbnail: {
+			url: `https://i.ytimg.com/vi/${data.videoId}/mqdefault.jpg`,
+			width: 320,
+			height: 180
+		},
 		uploaded: data.publishedTimeText?.simpleText || data.videoInfo?.runs?.[2]?.text,
 		lengthText: data.lengthText?.simpleText,
 		longLengthText: data.lengthText?.accessibility?.accessibilityData?.label,
