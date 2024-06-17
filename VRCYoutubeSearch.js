@@ -55,7 +55,18 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	var images = [];
 
 	if (options.thumbnails) {
-		videos.forEach(video => video.thumbnail.url && images.push(video.thumbnail));
+		videos.forEach(video => {
+			video.thumbnail = playlistId ? {
+				url: `https://i.ytimg.com/vi/${video.id}/default.jpg`,
+				width: 120,
+				height: 90
+			} : {
+				url: `https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`,
+				width: 320,
+				height: 180
+			};
+			images.push(video.thumbnail);
+		});
 	}
 
 	if (options.icons) {
