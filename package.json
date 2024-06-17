@@ -6,7 +6,8 @@
 		"fast-xml-parser": "^4.3.4",
 		"keyv": "^4.5.4",
 		"koa": "^2.14.2",
-		"koa-send": "^5.0.1"
+		"koa-send": "^5.0.1",
+		"potpack": "^2.0.0"
 	},
 	"engines": {
 		"node": ">=18.0.0"

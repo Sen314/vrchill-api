@@ -1,75 +1,42 @@
 import { createCanvas, loadImage } from 'canvas';
+import potpack from 'potpack';
 import { putVrcUrl } from './vrcurl.js';
 
 var store = {};
 
-
-const maxSheetWidth = 2048;
-const maxSheetHeight = 2048;
-export const iconWidth = 68;
-export const iconHeight = 68;
-//const maxIconRowLen = Math.floor(maxSheetWidth / iconWidth);
-const maxIconRowLen = 3;
-//const maxIconColLen = Math.floor(maxSheetHeight / iconHeight);
-
-async function createImageSheet({thumbnailUrls = [], iconUrls = [], thumbnailWidth = 360, thumbnailHeight = 202}) {
-	
-	const maxThumbnailRowLen = Math.floor(maxSheetWidth / thumbnailWidth);
-	//const maxThumbnailColLen = Math.floor(maxSheetHeight / thumbnailHeight);
-
-	var thumbnails = thumbnailUrls.map((url, index) => ({
-		x: index % maxThumbnailRowLen * thumbnailWidth,
-		y: Math.floor(index / maxThumbnailRowLen) * thumbnailHeight,
-		url
-	}));
-
-	const iconStartX = thumbnailWidth * Math.min(maxThumbnailRowLen, thumbnails.length);
-
-	var icons = iconUrls.map((url, index) => ({
-		x: iconStartX + index % maxIconRowLen * iconWidth,
-		y: Math.floor(index / maxIconRowLen) * iconHeight,
-		url
-	}));
-
-	const canvasWidth = Math.max(
-		Math.min(thumbnails.length, maxThumbnailRowLen) * thumbnailWidth,
-		iconStartX + Math.min(icons.length, maxIconRowLen) * iconWidth
-	);
-	const canvasHeight = Math.max(thumbnails.length ? thumbnails.at(-1).y + thumbnailHeight : 0, icons.length ? icons.at(-1)?.y + iconHeight : 0);
-
-	var canvas = createCanvas(Math.min(maxSheetWidth, canvasWidth), Math.min(maxSheetHeight, canvasHeight));
+async function createImageSheet(images /*[{width, height, url}]*/) {
+	images.forEach(image => {
+		image.w = image.width;
+		image.h = image.height;
+	});
+	var {w, h, fill} = potpack(images);
+	if (w > 2048) {
+		console.warn("Imagesheet exceeded max width");
+		w = 2048;
+	}
+	if (h > 2048) {
+		console.warn("Imagesheet exceeded max height");
+		h = 2048;
+	}
+	var canvas = createCanvas(w, h);
 	var ctx = canvas.getContext('2d');
 
-	var promises = [];
+	await Promise.all(images.map(({x, y, w, h, url}) => (async function(){
+		if (!url) return;
+		var image = await loadImage(url);
+		ctx.drawImage(image, x, y, w, h);
+	})().catch(error => console.error(error.stack))));
 
-	if (thumbnails.length) {
-		promises = promises.concat(thumbnails.map(({x, y, url}) => (async function(){
-			if (!url) return;
-			var image = await loadImage(url);
-			ctx.drawImage(image, x, y, thumbnailWidth, thumbnailHeight);
-		})().catch(error => console.error(error.stack))));
-	}
-
-	if (icons.length) {
-		promises = promises.concat(icons.map(({x, y, url}) => (async function(){
-			if (!url) return;
-			var image = await loadImage(url);
-			ctx.drawImage(image, x, y, iconWidth, iconHeight);
-		})().catch(error => console.error(error.stack))));
-	}
-
-	await Promise.all(promises);
 	return {
 		imagesheet: canvas.toBuffer("image/png"),
-		thumbnails, icons
+		images
 	};
 }
 
-
-export async function makeImageSheetVrcUrl(pool, opts) {
+export async function makeImageSheetVrcUrl(pool, images) {
 	var num = await putVrcUrl(pool, {type: "imagesheet"});
 	var key = `${pool}:${num}`;
-	var promise = createImageSheet(opts);
+	var promise = createImageSheet(images);
 	store[key] = promise;
 	promise.then(() => {
 		setTimeout(() => {

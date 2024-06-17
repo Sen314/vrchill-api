@@ -1,6 +1,6 @@
 import { searchYouTubeVideos, continueYouTubeVideoSearch, getYouTubePlaylist, continueYouTubePlaylist } from "./simpleYoutubeSearch.js";
 import { putVrcUrl } from "./vrcurl.js";
-import { makeImageSheetVrcUrl, iconWidth, iconHeight } from "./imagesheet.js";
+import { makeImageSheetVrcUrl } from "./imagesheet.js";
 import { getTrending } from "./trending.js";
 
 var cache = {};
@@ -52,27 +52,25 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 		var {videos, continuationData} = playlistId ? await getYouTubePlaylist(playlistId) : await searchYouTubeVideos(query);
 	}
 	
+	var images = [];
+
 	if (options.thumbnails) {
-		var thumbnailUrls = videos.map(video => video.thumbnail.url);
-		var smallestThumbnail = videos.map(video => video.thumbnail).reduce((smallest, selected) => selected.height < smallest.height ? selected : smallest);
+		videos.forEach(video => video.thumbnail.url && images.push(video.thumbnail));
 	}
 
 	if (options.icons) {
-		var iconUrls = new Set();
-		for (let video of videos) {
-			iconUrls.add(video.channel.iconUrl);
-		}
-		iconUrls = [...iconUrls];
+		let iconUrls = new Set();
+		videos.forEach(video => video.channel.iconUrl && iconUrls.add(video.channel.iconUrl));
+		iconUrls.forEach(url => images.push({
+			width: 68,//todo pass from yt data not hardcode
+			height: 68,
+			url
+		}));
 	}
 
-	if (thumbnailUrls?.length || iconUrls?.length) {
+	if (images.length) {
 		try {
-			var {vrcurl: imagesheet_vrcurl, thumbnails, icons} = await makeImageSheetVrcUrl(pool, {
-				thumbnailUrls,
-				iconUrls,
-				thumbnailWidth: smallestThumbnail.width,
-				thumbnailHeight: smallestThumbnail.height
-			});
+			var {vrcurl: imagesheet_vrcurl} = await makeImageSheetVrcUrl(pool, images);
 			data.imagesheet_vrcurl = imagesheet_vrcurl;
 		} catch (error) {
 			console.error(error.stack);
@@ -81,24 +79,20 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 
 	for (let video of videos) {
 		video.vrcurl = await putVrcUrl(pool, {type: "redirect", url: `https://www.youtube.com/watch?v=${video.id}`});
-		if (thumbnails?.length) {
-			let thumbnail = thumbnails.find(x => x.url == video.thumbnail.url);
-			video.thumbnail = {
-				x: thumbnail?.x,
-				y: thumbnail?.y,
-				width: smallestThumbnail?.width,
-				height: smallestThumbnail?.height
-			};
-		}
-		if (icons?.length) {
-			let icon = icons.find(x => x.url == video.channel.iconUrl);
-			video.channel.icon = {
-				x: icon?.x,
-				y: icon?.y,
-				width: iconWidth,
-				height: iconHeight
-			};
-		}
+		let thumbnail = images.find(image => image.url == video.thumbnail.url);
+		video.thumbnail = thumbnail ? {
+			x: thumbnail?.x,
+			y: thumbnail?.y,
+			width: thumbnail?.width,
+			height: thumbnail?.height
+		} : undefined;
+		let icon = images.find(image => image.url == video.channel.iconUrl);
+		video.channel.icon = icon ? {
+			x: icon?.x,
+			y: icon?.y,
+			width: icon?.width,
+			height: icon?.height
+		} : undefined;
 		if (options.captions) {
 			video.captions_vrcurl = await putVrcUrl(pool, {type: "captions", videoId: video.id});
 		}
