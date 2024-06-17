@@ -39,13 +39,13 @@ JSON object:
 	- `description`: (string) short truncated description snippet i.e. `"http://nyan.cat/ Original song : http://momolabo.lolipop.jp/nyancatsong/Nyan/"`
 	- `lengthText`?: (string) i.e. `"3:37"`
 	- `longLengthText`?: (string) i.e. `"3 minutes, 37 seconds"`
-	- `viewCountText`: (string) i.e. `"2,552,243 views"` or `"575 watching"` for live streams
-	- `shortViewCountText`?: (string) i.e. `"2.5M views"`
+	- `viewCountText`?: (string) i.e. `"2,552,243 views"` or `"575 watching"` for live streams (playlist results don't have this)
+	- `shortViewCountText`?: (string) i.e. `"2.5M views"` (streams don't have this)
 	- `uploaded`: (string) i.e. `"12 years ago"`
 	- `channel`: (object)
 		- `name`: (string) i.e. `"NyanCat"`
 		- `id`: (string) i.e. `"UCsW85RAS2_Twg_lEPyv7G8A"`
-		- `icon`?: (object)
+		- `icon`?: (object) (playlist results don't have this)
 			- `x`: (integer) px from left
 			- `y`: (integer) px from top
 			- `width`: (integer)

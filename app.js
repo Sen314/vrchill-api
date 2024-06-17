@@ -55,8 +55,8 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			ctx.body = buf;
 			ctx.type = "image/png";
 			break;
-		case "ytContinuation":
-			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "continuation", continuationData: dest.continuationData}, dest.options);
+		case "continuation":
+			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "continuation", for: dest.for, continuationData: dest.continuationData}, dest.options);
 			break;
 		case "trending":
 			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "trending", bp: dest.bp}, dest.options);

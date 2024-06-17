@@ -32,6 +32,7 @@ export async function getTrending(bp) {
 					.content
 					.expandedShelfContentsRenderer
 					.items
+					.filterMap(x => x.videoRenderer)
 					.map(parseVideoRendererData)
 			};
 		})

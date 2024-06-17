@@ -1,6 +1,6 @@
-import { searchYouTubeVideos, continueYouTubeVideoSearch } from "./simpleYoutubeSearch.js";
+import { searchYouTubeVideos, continueYouTubeVideoSearch, getYouTubePlaylist, continueYouTubePlaylist } from "./simpleYoutubeSearch.js";
 import { putVrcUrl } from "./vrcurl.js";
-import { makeImageSheetVrcUrl, thumbnailWidth, thumbnailHeight, iconWidth, iconHeight } from "./imagesheet.js";
+import { makeImageSheetVrcUrl, iconWidth, iconHeight } from "./imagesheet.js";
 import { getTrending } from "./trending.js";
 
 var cache = {};
@@ -38,15 +38,23 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 				}
 				break;
 			case "continuation":
-				var {videos, continuationData} = await continueYouTubeVideoSearch(query.continuationData);
+				//var {videos, continuationData} = await [query.for == "playlist" ? continueYouTubePlaylist : continueYouTubeVideoSearch](query.continuationData);
+				if (query.for == "playlist") {
+					var {videos, continuationData} = await continueYouTubePlaylist(query.continuationData);
+				} else {
+					var {videos, continuationData} = await continueYouTubeVideoSearch(query.continuationData);
+				}
 				break;
 		}
 	} else {
-		var {videos, continuationData} = await searchYouTubeVideos(query);
+		var playlistId = query.match(/list=(PL[a-zA-Z0-9-_]{32})/)?.[1];
+		if (playlistId) console.debug("playlistId:", playlistId);
+		var {videos, continuationData} = playlistId ? await getYouTubePlaylist(playlistId) : await searchYouTubeVideos(query);
 	}
 	
 	if (options.thumbnails) {
-		var thumbnailUrls = videos.map(video => video.thumbnailUrl);
+		var thumbnailUrls = videos.map(video => video.thumbnail.url);
+		var smallestThumbnail = videos.map(video => video.thumbnail).reduce((smallest, selected) => selected.height < smallest.height ? selected : smallest);
 	}
 
 	if (options.icons) {
@@ -59,7 +67,12 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 
 	if (thumbnailUrls?.length || iconUrls?.length) {
 		try {
-			var {vrcurl: imagesheet_vrcurl, thumbnails, icons} = await makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls);
+			var {vrcurl: imagesheet_vrcurl, thumbnails, icons} = await makeImageSheetVrcUrl(pool, {
+				thumbnailUrls,
+				iconUrls,
+				thumbnailWidth: smallestThumbnail.width,
+				thumbnailHeight: smallestThumbnail.height
+			});
 			data.imagesheet_vrcurl = imagesheet_vrcurl;
 		} catch (error) {
 			console.error(error.stack);
@@ -69,12 +82,12 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	for (let video of videos) {
 		video.vrcurl = await putVrcUrl(pool, {type: "redirect", url: `https://www.youtube.com/watch?v=${video.id}`});
 		if (thumbnails?.length) {
-			let thumbnail = thumbnails.find(x => x.url == video.thumbnailUrl);
+			let thumbnail = thumbnails.find(x => x.url == video.thumbnail.url);
 			video.thumbnail = {
 				x: thumbnail?.x,
 				y: thumbnail?.y,
-				width: thumbnailWidth,
-				height: thumbnailHeight
+				width: smallestThumbnail?.width,
+				height: smallestThumbnail?.height
 			};
 		}
 		if (icons?.length) {
@@ -89,13 +102,13 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 		if (options.captions) {
 			video.captions_vrcurl = await putVrcUrl(pool, {type: "captions", videoId: video.id});
 		}
-		delete video.thumbnailUrl;
 		delete video.channel.iconUrl;
 		data.results.push(video);
 	}
 
 	if (continuationData) data.nextpage_vrcurl = await putVrcUrl(pool, {
-		type: "ytContinuation",
+		type: "continuation",
+		for: query.for || (playlistId ? "playlist" : "search"),
 		continuationData,
 		options
 	});

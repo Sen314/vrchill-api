@@ -4,35 +4,32 @@ import { putVrcUrl } from './vrcurl.js';
 var store = {};
 
 
-export const thumbnailWidth = 360;
-export const thumbnailHeight = 202;
-export const iconWidth = 68;
-export const iconHeight = 68;
 const maxSheetWidth = 2048;
 const maxSheetHeight = 2048;
-const maxThumbnailRowLen = Math.floor(maxSheetWidth / thumbnailWidth); // 5
-//const maxThumbnailColLen = Math.floor(maxSheetHeight / thumbnailHeight); // 10
-//const maxIconRowLen = Math.floor(maxSheetWidth / iconWidth); // 30
+export const iconWidth = 68;
+export const iconHeight = 68;
+//const maxIconRowLen = Math.floor(maxSheetWidth / iconWidth);
 const maxIconRowLen = 3;
-//const maxIconColLen = Math.floor(maxSheetHeight / iconHeight); // 30
+//const maxIconColLen = Math.floor(maxSheetHeight / iconHeight);
 
-
-async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
+async function createImageSheet({thumbnailUrls = [], iconUrls = [], thumbnailWidth = 360, thumbnailHeight = 202}) {
 	
+	const maxThumbnailRowLen = Math.floor(maxSheetWidth / thumbnailWidth);
+	//const maxThumbnailColLen = Math.floor(maxSheetHeight / thumbnailHeight);
 
-	var thumbnails = thumbnailUrls.map((url, index) => {
-		const x = index % maxThumbnailRowLen * thumbnailWidth;
-		const y = Math.floor(index / maxThumbnailRowLen) * thumbnailHeight;
-		return {x, y, url};
-	});
+	var thumbnails = thumbnailUrls.map((url, index) => ({
+		x: index % maxThumbnailRowLen * thumbnailWidth,
+		y: Math.floor(index / maxThumbnailRowLen) * thumbnailHeight,
+		url
+	}));
 
 	const iconStartX = thumbnailWidth * Math.min(maxThumbnailRowLen, thumbnails.length);
 
-	var icons = iconUrls.map((url, index) => {
-		const x = iconStartX + index % maxIconRowLen * iconWidth;
-		const y = Math.floor(index / maxIconRowLen) * iconHeight;
-		return {x, y, url};
-	});
+	var icons = iconUrls.map((url, index) => ({
+		x: iconStartX + index % maxIconRowLen * iconWidth,
+		y: Math.floor(index / maxIconRowLen) * iconHeight,
+		url
+	}));
 
 	const canvasWidth = Math.max(
 		Math.min(thumbnails.length, maxThumbnailRowLen) * thumbnailWidth,
@@ -47,6 +44,7 @@ async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
 
 	if (thumbnails.length) {
 		promises = promises.concat(thumbnails.map(({x, y, url}) => (async function(){
+			if (!url) return;
 			var image = await loadImage(url);
 			ctx.drawImage(image, x, y, thumbnailWidth, thumbnailHeight);
 		})().catch(error => console.error(error.stack))));
@@ -54,6 +52,7 @@ async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
 
 	if (icons.length) {
 		promises = promises.concat(icons.map(({x, y, url}) => (async function(){
+			if (!url) return;
 			var image = await loadImage(url);
 			ctx.drawImage(image, x, y, iconWidth, iconHeight);
 		})().catch(error => console.error(error.stack))));
@@ -67,10 +66,10 @@ async function createImageSheet(thumbnailUrls = [], iconUrls = []) {
 }
 
 
-export async function makeImageSheetVrcUrl(pool, thumbnailUrls, iconUrls) {
+export async function makeImageSheetVrcUrl(pool, opts) {
 	var num = await putVrcUrl(pool, {type: "imagesheet"});
 	var key = `${pool}:${num}`;
-	var promise = createImageSheet(thumbnailUrls, iconUrls);
+	var promise = createImageSheet(opts);
 	store[key] = promise;
 	promise.then(() => {
 		setTimeout(() => {
