@@ -6,7 +6,7 @@ import send from "koa-send";
 import { cachedVRCYoutubeSearch } from "./VRCYoutubeSearch.js"
 import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
-import { getVideoCaptionsCached } from "./captions.js";
+import { getVideoCaptionsCached } from "./youtube-captions.js";
 import { stringToBoolean } from "./util.js";
 import shorturlmap from "./shorturlmap.json" assert { type: "json" };
 

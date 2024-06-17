@@ -1,7 +1,6 @@
-import { searchYouTubeVideos, continueYouTubeVideoSearch, getYouTubePlaylist, continueYouTubePlaylist } from "./simpleYoutubeSearch.js";
+import { searchYouTubeVideos, continueYouTubeVideoSearch, getYouTubePlaylist, continueYouTubePlaylist, getTrending } from "./youtube.js";
 import { putVrcUrl } from "./vrcurl.js";
 import { makeImageSheetVrcUrl } from "./imagesheet.js";
-import { getTrending } from "./trending.js";
 
 var cache = {};
 
