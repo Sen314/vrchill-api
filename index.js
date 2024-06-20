@@ -24,7 +24,7 @@ router.get(["/search", "/trending"], async ctx => {
 			ctx.body = "missing search query";
 			return;
 		}
-		query = decodeURIComponent(query).replace(/^.*→/, '').trim();
+		query = decodeURIComponent(query).replace(/^.*→/, '').replaceAll("\u200b", '').trim();
 	}
 
 	if (!ctx.query.pool || !/^[a-z-_]+\d*$/.test(ctx.query.pool)) {
