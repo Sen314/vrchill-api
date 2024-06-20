@@ -15,11 +15,16 @@ var router = new Router();
 
 
 router.get(["/search", "/trending"], async ctx => {
-	var query = ctx.path == "/trending" ? {"type":"trending"} : ctx.query.input?.replace(/^.*→/, '').trim();
-	if (!query) {
-		ctx.status = 400;
-		ctx.body = "missing search query";
-		return;
+	if (ctx.path == "/trending") {
+		var query = {"type":"trending"};
+	} else {
+		var query = ctx.querystring.match(/[?&]input=(.*)/i)?.[1];
+		if (!query) {
+			ctx.status = 400;
+			ctx.body = "missing search query";
+			return;
+		}
+		query = decodeURIComponent(query).replace(/^.*→/, '').trim();
 	}
 
 	if (!ctx.query.pool || !/^[a-z-_]+\d*$/.test(ctx.query.pool)) {

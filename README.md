@@ -13,7 +13,7 @@ Get YouTube videos for a search query.
 ### Required query parameters
 
 - `pool`: id of the VRCUrl pool, only letters numbers hyphens or underscores, optionally followed by an integer for pool size.
-- `input`: youtube search query. All chars up to and including this exact unicode char `→` are ignored, and then whitespace is trimmed.
+- `input`: youtube search query. All chars up to and including this exact unicode char `→` are ignored, and then whitespace is trimmed. THIS MUST BE THE LAST QUERY PARAMETER AS ALL CHARS AFTER IT ARE CAPTURED VERBATIM (so you can type & etc without encoding)
 
 ### Optional query parameters
 
