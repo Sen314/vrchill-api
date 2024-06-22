@@ -55,15 +55,21 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 
 	if (options.thumbnails) {
 		videos.forEach(video => {
-			video.thumbnail = playlistId ? {
+			if (playlistId) video.thumbnail = {
 				url: `https://i.ytimg.com/vi/${video.id}/default.jpg`,
 				width: 120,
 				height: 90
-			} : {
-				url: `https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`,
-				width: 320,
-				height: 180
 			};
+			else {
+				video.thumbnail ||= {
+					url: `https://i.ytimg.com/vi/${data.videoId}/mqdefault.jpg`,
+					width: 320,
+					height: 180
+				};
+				console.debug(video.thumbnail);
+				video.thumbnail.width = 360;
+				video.thumbnail.height = 202;
+			}
 			images.push(video.thumbnail);
 		});
 	}
