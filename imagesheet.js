@@ -4,12 +4,21 @@ import { putVrcUrl } from './vrcurl.js';
 
 var store = {};
 
-async function createImageSheet(images /*[{width, height, url}]*/) {
+async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
 	images.forEach(image => {
 		image.w = image.width;
 		image.h = image.height;
 	});
-	var {w, h, fill} = potpack(images);
+	if (legacyMode) {
+		images.forEach((image, index) => {
+			image.x = index % 5 * 360;
+			image.y = Math.floor(index / 5) * 202;
+		});
+		var w = Math.min(images.length, 5) * 360;
+		var h = images.at(-1).y + 202;
+	} else {
+		var {w, h, fill} = potpack(images);
+	}
 	if (w > 2048) {
 		console.warn("Imagesheet exceeded max width");
 		w = 2048;
@@ -33,10 +42,10 @@ async function createImageSheet(images /*[{width, height, url}]*/) {
 	};
 }
 
-export async function makeImageSheetVrcUrl(pool, images) {
+export async function makeImageSheetVrcUrl(pool, images, legacyMode) {
 	var num = await putVrcUrl(pool, {type: "imagesheet"});
 	var key = `${pool}:${num}`;
-	var promise = createImageSheet(images);
+	var promise = createImageSheet(images, legacyMode);
 	store[key] = promise;
 	promise.then(() => {
 		setTimeout(() => {
