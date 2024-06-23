@@ -13,7 +13,7 @@ Get YouTube videos for a search query.
 ### Required query parameters
 
 - `pool`: id of the VRCUrl pool, only letters numbers hyphens or underscores, optionally followed by an integer for pool size.
-- `input`: youtube search query. All chars up to and including this exact unicode char `→` are ignored, and then whitespace is trimmed. THIS MUST BE THE LAST QUERY PARAMETER AS ALL CHARS AFTER IT ARE CAPTURED VERBATIM (so you can type & etc without encoding)
+- `input`: youtube search query. All chars up to and including this exact unicode char `→` are ignored, and then whitespace is trimmed. THIS MUST BE THE LAST QUERY PARAMETER AS ALL CHARS AFTER IT ARE CAPTURED VERBATIM (so you can type & etc without encoding). If this contains a url with a playlist ID, playlist results will be loaded instead (which is a bit different, up to 100 results and no descriptions).
 
 ### Optional query parameters
 
@@ -36,7 +36,7 @@ JSON object:
 	- `live`: (boolean) whether it's a live stream
 	- `title`: (string) i.e. `"Nyan Cat! [Official]"`
 	- `id`: (string) YouTube video id i.e. `"2yJgwwDcgV8"`
-	- `description`: (string) short truncated description snippet i.e. `"http://nyan.cat/ Original song : http://momolabo.lolipop.jp/nyancatsong/Nyan/"`
+	- `description`?: (string) short truncated description snippet i.e. `"http://nyan.cat/ Original song : http://momolabo.lolipop.jp/nyancatsong/Nyan/"` (playlist results don't have this)
 	- `lengthText`?: (string) i.e. `"3:37"`
 	- `longLengthText`?: (string) i.e. `"3 minutes, 37 seconds"`
 	- `viewCountText`?: (string) i.e. `"2,552,243 views"` or `"575 watching"` for live streams (playlist results don't have this)
@@ -108,4 +108,4 @@ All resources (youtube urls etc) referenced in the search results will be substi
 
 Video thumbnails and channel icons are collated together into one image and served at a VRCUrl to be loaded by VRCImageDownloader.
 
-Use the x, y, width and height values from the json to crop the image from the sheet.
+Use the x, y, width and height values from the json to crop the image from the sheet. Do not make any assumptions about these values as the server could arrange the images wherever it wants.
