@@ -53,6 +53,13 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 		case "redirect":
 			ctx.redirect(dest.url);
 			break;
+		case "video":
+			if (ctx.get("User-Agent").includes("UnityWebRequest")) {
+				ctx.body = {captions: await getVideoCaptionsCached(dest.id)};
+			} else {
+				ctx.redirect(`https://www.youtube.com/watch?v=${dest.id}`);
+			}
+			break;
 		case "imagesheet":
 			let buf = await getImageSheet(ctx.params.pool, ctx.params.num);
 			if (!buf) {

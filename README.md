@@ -19,7 +19,6 @@ Get YouTube videos for a search query.
 
 - `thumbnails`: set to `1`, `true`, `yes`, `on` or whatever to load thumbnails
 - `icons`: set to `1`, `true`, `yes`, `on` or whatever to load channel icons
-- `captions`: set to `1`, `true`, `yes`, `on` or whatever if you need access to closed captioning data
 
 ### Example URL
 
@@ -32,7 +31,7 @@ https://api.u2b.cx/search?pool=example10000&input=   Type YouTube search query h
 JSON object:
 
 - `results`: Array of Object
-	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url
+	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url, or serve JSON with captions if used with string loader.
 	- `live`: (boolean) whether it's a live stream
 	- `title`: (string) i.e. `"Nyan Cat! [Official]"`
 	- `id`: (string) YouTube video id i.e. `"2yJgwwDcgV8"`
@@ -55,7 +54,6 @@ JSON object:
 		- `y`: (integer) px from top
 		- `width`: (integer)
 		- `height`: (integer)
-	- `captions_vrcurl`?: (integer) index of vrcurl to get the caption data json
 - `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
 - `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results
 
@@ -73,11 +71,11 @@ Gets Trending YouTube videos. Identical to `/search` but without `input` paramet
 - `{pool}`: must be same as pool param in search endpoint.
 - `{index}`: vrcurl index number
 
-Response may be 302 redirect to youtube url, `image/png` for imagesheet, `application/json` for next page (see response format above) or trending tab or caption data (below).
+Response may be 302 redirect to youtube url, `image/png` for imagesheet, `application/json` for next page (see response format above) or trending tab or video json data (see below).
 
-### Caption JSON format
+### Video metadata JSON format
 
-- Array of Object
+- `captions`: Array of Object
 	- `name`: (string) caption track name like "English" or "English (auto-generated)"
 	- `id`: (string) id like `.en` or `a.en`
 	- `lines`: Array of Object

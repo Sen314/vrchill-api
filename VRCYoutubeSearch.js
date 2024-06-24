@@ -94,7 +94,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	}
 
 	for (let video of videos) {
-		video.vrcurl = await putVrcUrl(pool, {type: "redirect", url: `https://www.youtube.com/watch?v=${video.id}`});
+		video.vrcurl = await putVrcUrl(pool, {type: "video", id: video.id});
 		let thumbnail = images.find(image => image.url == video.thumbnail.url);
 		video.thumbnail = thumbnail ? {
 			x: thumbnail?.x,
