@@ -8,7 +8,8 @@ import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
 import { getVideoCaptionsCached } from "./youtube-captions.js";
 import { stringToBoolean } from "./util.js";
-import shorturlmap from "./shorturlmap.json" with { type: "json" };
+import { readFileSync } from "fs";
+var shorturlmap = JSON.parse(readFileSync("./shorturlmap.json", "utf8"));
 
 var app = new Koa();
 var router = new Router();
