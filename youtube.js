@@ -1,14 +1,42 @@
 
-export async function searchYouTubeVideos(query) {
-	var url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.replaceAll(' ', '+'))}&sp=EgIQAQ%253D%253D`;
+export async function searchYouTubeVideos(query, sp = "EgIQAQ%253D%253D") {
+	console.debug(sp);
+	var url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.replaceAll(' ', '+'))}${sp ? `$sp=${sp}` : ''}`;
 	var html = await fetch(url).then(res => res.text());
 
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 	console.debug(ytInitialData);
 
-	var videos = ytInitialData?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.find(x => x.itemSectionRenderer?.contents?.find(x => x.videoRenderer))?.itemSectionRenderer?.contents?.filterMap(x => x.videoRenderer)?.map(parseVideoRendererData);
+	var sectionListRendererContents = ytInitialData
+		.contents
+		.twoColumnSearchResultsRenderer
+		.primaryContents
+		.sectionListRenderer
+		.contents;
+
+	var videos = sectionListRendererContents
+		?.find(x => x.itemSectionRenderer?.contents?.find(x => x.videoRenderer))
+		?.itemSectionRenderer
+		.contents
+		.filterMap(x => x.videoRenderer)
+		.map(parseVideoRendererData);
 	if (!videos) return {videos: []};
+
+	var latest = sectionListRendererContents
+		.find(x => x.itemSectionRenderer?.contents?.find(x => x.shelfRenderer))
+		?.itemSectionRenderer
+		.contents
+		.find(x => x.shelfRenderer?.title?.simpleText?.startsWith("Latest from"))
+		?.shelfRenderer
+		.content
+		.verticalListRenderer
+		.items
+		.filterMap(x => x.videoRenderer)
+		.map(parseVideoRendererData);
+	console.debug("latest", latest);
+	if (latest) videos = [...latest, ...videos];
+
 	console.debug(videos.length, "results");
 
 	try {
@@ -16,7 +44,7 @@ export async function searchYouTubeVideos(query) {
 		ytcfg = JSON.parse(ytcfg);
 		var continuationData = {
 			context: ytcfg.INNERTUBE_CONTEXT,
-			continuation: ytInitialData.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.find(x => x.continuationItemRenderer).continuationItemRenderer.continuationEndpoint.continuationCommand.token
+			continuation: sectionListRendererContents.findMap(x => x.continuationItemRenderer).continuationEndpoint.continuationCommand.token
 		}
 	} catch (error) {
 		console.error(error.stack);
@@ -35,9 +63,21 @@ export async function continueYouTubeVideoSearch(continuationData) {
 	}).then(res => res.json());
 	console.debug(data);
 
-	var continuationItems = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems;
-	var videos = continuationItems.find(x => x.itemSectionRenderer?.contents.find(x => x.videoRenderer)).itemSectionRenderer.contents.filterMap(x => x.videoRenderer).map(parseVideoRendererData);
-	var continuationToken = continuationItems.find(x => x.continuationItemRenderer)?.continuationItemRenderer.continuationEndpoint.continuationCommand.token
+	var continuationItems = data
+		.onResponseReceivedCommands[0]
+		.appendContinuationItemsAction
+		.continuationItems;
+	var videos = continuationItems
+		.find(x => x.itemSectionRenderer?.contents.find(x => x.videoRenderer))
+		.itemSectionRenderer
+		.contents
+		.filterMap(x => x.videoRenderer)
+		.map(parseVideoRendererData);
+	var continuationToken = continuationItems
+		.findMap(x => x.continuationItemRenderer)
+		?.continuationEndpoint
+		.continuationCommand
+		.token;
 	console.debug(videos.length, "results");
 
 
@@ -58,8 +98,20 @@ export async function getYouTubePlaylist(playlistId) {
 	ytInitialData = JSON.parse(ytInitialData);
 	console.debug(ytInitialData);
 
-	var sectionListRendererContents = ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs.find(tab => tab.tabRenderer.selected).tabRenderer.content.sectionListRenderer.contents;
-	var videos = sectionListRendererContents.find(x => x.itemSectionRenderer).itemSectionRenderer.contents.find(x => x.playlistVideoListRenderer).playlistVideoListRenderer.contents.filterMap(x => x.playlistVideoRenderer).map(parseVideoRendererData);
+	var sectionListRendererContents = ytInitialData
+		.contents
+		.twoColumnBrowseResultsRenderer
+		.tabs
+		.find(tab => tab.tabRenderer.selected)
+		.tabRenderer
+		.content
+		.sectionListRenderer
+		.contents;
+	var videos = sectionListRendererContents
+		.findMap(x => x.itemSectionRenderer?.contents)
+		.findMap(x => x.playlistVideoListRenderer?.contents)
+		.filterMap(x => x.playlistVideoRenderer)
+		.map(parseVideoRendererData);
 	if (!videos) return {videos: []};
 	console.debug(videos.length, "results");
 
@@ -68,7 +120,7 @@ export async function getYouTubePlaylist(playlistId) {
 		ytcfg = JSON.parse(ytcfg);
 		var continuationData = {
 			context: ytcfg.INNERTUBE_CONTEXT,
-			continuation: sectionListRendererContents.find(x => x.continuationItemRenderer).continuationItemRenderer.continuationEndpoint.continuationCommand.token
+			continuation: sectionListRendererContents.findMap(x => x.continuationItemRenderer).continuationEndpoint.continuationCommand.token
 		}
 	} catch (error) {
 		console.error(error.stack);
@@ -85,9 +137,19 @@ export async function continueYouTubePlaylist(continuationData) {
 	console.debug(data);
 
 	if (!data.onResponseReceivedActions) return {videos:[]};
-	var continuationItems = data.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems;
-	var videos = continuationItems.find(x => x.itemSectionRenderer).itemSectionRenderer.contents.filterMap(x => x.playlistVideoListRenderer).map(parseVideoRendererData);
-	var continuationToken = continuationItems.find(x => x.continuationItemRenderer)?.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
+	var continuationItems = data
+		.onResponseReceivedActions[0]
+		.appendContinuationItemsAction
+		.continuationItems;
+	var videos = continuationItems
+		.findMap(x => x.itemSectionRenderer?.contents)
+		.filterMap(x => x.playlistVideoListRenderer)
+		.map(parseVideoRendererData);
+	var continuationToken = continuationItems
+		.findMap(x => x.continuationItemRenderer)
+		?.continuationEndpoint
+		.continuationCommand
+		.token;
 	console.debug(videos.length, "results");
 
 	return {
@@ -133,7 +195,7 @@ export async function getTrending(bp) {
 		.contents
 		// regular trending in sections with shelfRenderer without title
 		.filterMap(x => {
-			var shelfRenderer = x.itemSectionRenderer.contents.find(x => x.shelfRenderer)?.shelfRenderer;
+			var shelfRenderer = x.itemSectionRenderer.contents.findMap(x => x.shelfRenderer);
 			if (shelfRenderer && !shelfRenderer.title) {
 				return shelfRenderer
 					.content

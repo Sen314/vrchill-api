@@ -19,6 +19,8 @@ Get YouTube videos for a search query.
 
 - `thumbnails`: set to `1`, `true`, `yes`, `on` or whatever to load thumbnails
 - `icons`: set to `1`, `true`, `yes`, `on` or whatever to load channel icons
+- `mode`: If set to `latestontop` will search without filter to include the "Latest from ..." section (if it exists). Otherwise it uses search filter for Videos only sorted by Relevance.
+- `bp`: Custom YouTube search filter. Go to youtube search site and set some filters and you will see the corresponding `bp` value in the URL. Overrides `mode` option. Use at your own risk (experimental).
 
 ### Example URL
 

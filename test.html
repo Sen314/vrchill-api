@@ -14,7 +14,7 @@
 	<br />
 	<label><input id="thumbnails" type="checkbox" checked>thumbnails</label>
 	<label><input id="icons" type="checkbox" checked>icons</label>
-	<label><input id="captions" type="checkbox" checked>captions</label>
+	<label><input id="latestontop" type="checkbox" checked>latestontop</label>
 </div>
 
 <div id="output"></div>
@@ -30,11 +30,11 @@ var lastData;
 
 search.onclick = () => {
 	output.innerHTML = "";
-	loadData(`/search?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&captions=${captions.checked}&input=${encodeURIComponent(input.value)}`);
+	loadData(`/search?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&mode=${latestontop.checked&&"latestontop"}&input=${encodeURIComponent(input.value)}`);
 };
 trending.onclick = () => {
 	output.innerHTML = "";
-	loadData(`/trending?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}&captions=${captions.checked}`);
+	loadData(`/trending?pool=test1000&thumbnails=${thumbnails.checked}&icons=${icons.checked}`);
 }
 
 async function loadData(url) {

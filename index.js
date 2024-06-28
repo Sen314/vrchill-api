@@ -36,7 +36,9 @@ router.get(["/search", "/trending"], async ctx => {
 	var options = {
 		thumbnails: stringToBoolean(ctx.query.thumbnails),
 		icons: stringToBoolean(ctx.query.icons),
-		captions: stringToBoolean(ctx.query.captions)
+		captions: stringToBoolean(ctx.query.captions),
+		mode: ctx.query.mode,
+		bp: ctx.query.bp
 	};
 
 	ctx.body = await cachedVRCYoutubeSearch(ctx.query.pool, query, options);

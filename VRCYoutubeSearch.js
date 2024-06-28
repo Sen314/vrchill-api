@@ -48,7 +48,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 	} else {
 		var playlistId = query.match(/list=(PL[a-zA-Z0-9-_]{32})/)?.[1];
 		if (playlistId) console.log("playlistId:", playlistId);
-		var {videos, continuationData} = playlistId ? await getYouTubePlaylist(playlistId) : await searchYouTubeVideos(query);
+		var {videos, continuationData} = playlistId ? await getYouTubePlaylist(playlistId) : await searchYouTubeVideos(query, options.bp || (options.mode == "latestontop" ? null : undefined));
 	}
 	
 	var images = [];
