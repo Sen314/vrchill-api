@@ -30,7 +30,7 @@ router.get(["/search", "/trending"], async ctx => {
 		input = decodeURIComponent(input).replace(/^.*→/, '').replaceAll("\u200b", '').trim();
 	}
 
-	var pqs = qs.parse(ctx.querystring, {parameterLimit: 1})
+	var pqs = qs.parse(ctx.querystring, {duplicates: 'first'});
 
 	if (!pqs.pool || !/^[a-z-_]+\d*$/.test(pqs.pool)) {
 		ctx.status = 400;
