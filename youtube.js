@@ -1,11 +1,13 @@
-import { determinedFetch } from "./util.js";
+import { gotw } from "./util.js";
+
+
+
 
 export async function searchYouTubeVideos(query, sp = "EgIQAQ%253D%253D") {
 	console.debug("sp", sp);
 	var url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.replaceAll(' ', '+'))}${sp ? `$sp=${sp}` : ''}`;
-	var res = await determinedFetch(url);
-	var html = await res.text();
-
+	var res = await gotw(url), html = res.body;
+ 
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)?.[1];
 	if (!ytInitialData) {
 		console.error("missing ytInitialData", query, res.status, html);
@@ -58,14 +60,16 @@ export async function searchYouTubeVideos(query, sp = "EgIQAQ%253D%253D") {
 	return {videos, continuationData};
 }
 
+
+
+
 export async function continueYouTubeVideoSearch(continuationData) {
-	var data = await determinedFetch("https://www.youtube.com/youtubei/v1/search?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", {
+	var res = await gotw("https://www.youtube.com/youtubei/v1/search?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", {
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify(continuationData)
-	}).then(res => res.json());
+		json: continuationData,
+		responseType: "json"
+	});
+	var data = res.body;
 	console.debug(data);
 
 	var continuationItems = data
@@ -97,8 +101,15 @@ export async function continueYouTubeVideoSearch(continuationData) {
 
 
 
+
+
+
+
+
+
 export async function getYouTubePlaylist(playlistId) {
-	var html = await determinedFetch("https://www.youtube.com/playlist?list=" + playlistId).then(res => res.text());
+	var res = await gotw("https://www.youtube.com/playlist?list=" + playlistId);
+	var html = res.body;
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 	console.debug(ytInitialData);
@@ -133,12 +144,16 @@ export async function getYouTubePlaylist(playlistId) {
 	return {videos, continuationData};
 }
 
+
+
+
 export async function continueYouTubePlaylist(continuationData) {
-	var data = await determinedFetch("https://www.youtube.com/youtubei/v1/browse?prettyPrint=false", {
+	var res = await gotw("https://www.youtube.com/youtubei/v1/browse?prettyPrint=false", {
 		method: "POST",
-		headers: {"Content-Type": "application/json"},
-		body: JSON.stringify(continuationData)
-	}).then(res => res.json());
+		json: continuationData,
+		responseType: "json"
+	});
+	var data = res.body;
 	console.debug(data);
 
 	if (!data.onResponseReceivedActions) return {videos:[]};
@@ -177,7 +192,8 @@ export async function continueYouTubePlaylist(continuationData) {
 export async function getTrending(bp) {
 	var url = `https://www.youtube.com/feed/trending`;
 	if (bp) url += `?bp=${bp}`;
-	var html = await determinedFetch(url).then(res => res.text());
+	var res = await gotw(url);
+	var html = res.body;
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 

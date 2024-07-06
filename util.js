@@ -1,3 +1,6 @@
+import {readFileSync} from "fs";
+import got from "got";
+
 Array.prototype.filterMap = function(fn) {
 	var newarray = [];
 	for (var item of this) {
@@ -32,18 +35,15 @@ export function stringToBoolean(str) {
 }
 
 
-export async function determinedFetch() {
-	var reattempts = 2;
-	do {
-		try {
-			console.debug("fetch", arguments);
-			return await fetch.apply(null, arguments);
-		} catch (error) {
-			console.error(error.message, "cause:", error.cause?.message || error.cause);
-			if (!reattempts) {
-				error.stack += "\ncause: " + error.cause.stack;
-				throw error;
-			};
-		}
-	} while (reattempts--)
+
+
+try {
+	var ips = readFileSync("ips.txt", "utf8").trim().split("\n");
+	console.log("using ips", ips);
+} catch (e) {}
+
+export function gotw(url, options = {}) {
+	if (ips) options.localAddress = ips[Math.floor(Math.random() * ips.length)];
+	//options.timeout = {request: 3000}; //"RequestError: Expected values which are `number` or `undefined`. Received values of type `Function`." what the fuck?
+	return got(url, options);
 }
