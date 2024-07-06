@@ -1,4 +1,5 @@
 if (process.env.D!="BUG") console.debug = () => {};
+else console.debug(process.env);
 import "./util.js";
 import Koa from "koa";
 import Router from "@koa/router";
@@ -102,6 +103,18 @@ router.get("/", ctx => {
 
 
 
+
+
+app.use(async (ctx, next) => {
+	try {
+		await next();
+	} catch (error) {
+		console.error(ctx.url, error.stack);
+		ctx.status = 500;
+		ctx.type = "text";
+		ctx.body = error.stack;
+	}
+});
 
 
 // short urls to work around https://feedback.vrchat.com/udon/p/vrcurlinputfield-incorrect-focus-issue-on-quest

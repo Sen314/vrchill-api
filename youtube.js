@@ -1,10 +1,15 @@
+import { determinedFetch } from "./util.js";
 
 export async function searchYouTubeVideos(query, sp = "EgIQAQ%253D%253D") {
-	console.debug(sp);
+	console.debug("sp", sp);
 	var url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.replaceAll(' ', '+'))}${sp ? `$sp=${sp}` : ''}`;
-	var html = await fetch(url).then(res => res.text());
+	var res = await determinedFetch(url);
+	var html = await res.text();
 
-	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
+	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)?.[1];
+	if (!ytInitialData) {
+		console.error("missing ytInitialData", query, res.status, html);
+	}
 	ytInitialData = JSON.parse(ytInitialData);
 	console.debug(ytInitialData);
 
@@ -54,7 +59,7 @@ export async function searchYouTubeVideos(query, sp = "EgIQAQ%253D%253D") {
 }
 
 export async function continueYouTubeVideoSearch(continuationData) {
-	var data = await fetch("https://www.youtube.com/youtubei/v1/search?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", {
+	var data = await determinedFetch("https://www.youtube.com/youtubei/v1/search?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"
@@ -93,7 +98,7 @@ export async function continueYouTubeVideoSearch(continuationData) {
 
 
 export async function getYouTubePlaylist(playlistId) {
-	var html = await fetch("https://www.youtube.com/playlist?list=" + playlistId).then(res => res.text());
+	var html = await determinedFetch("https://www.youtube.com/playlist?list=" + playlistId).then(res => res.text());
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 	console.debug(ytInitialData);
@@ -129,7 +134,7 @@ export async function getYouTubePlaylist(playlistId) {
 }
 
 export async function continueYouTubePlaylist(continuationData) {
-	var data = await fetch("https://www.youtube.com/youtubei/v1/browse?prettyPrint=false", {
+	var data = await determinedFetch("https://www.youtube.com/youtubei/v1/browse?prettyPrint=false", {
 		method: "POST",
 		headers: {"Content-Type": "application/json"},
 		body: JSON.stringify(continuationData)
@@ -172,7 +177,7 @@ export async function continueYouTubePlaylist(continuationData) {
 export async function getTrending(bp) {
 	var url = `https://www.youtube.com/feed/trending`;
 	if (bp) url += `?bp=${bp}`;
-	var html = await fetch(url).then(res => res.text());
+	var html = await determinedFetch(url).then(res => res.text());
 	var ytInitialData = html.match(/ytInitialData = ({.*});<\/script>/)[1];
 	ytInitialData = JSON.parse(ytInitialData);
 

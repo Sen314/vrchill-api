@@ -30,3 +30,20 @@ export function stringToBoolean(str) {
 	}
 	return false;
 }
+
+
+export async function determinedFetch() {
+	var reattempts = 2;
+	do {
+		try {
+			console.debug("fetch", arguments);
+			return await fetch.apply(null, arguments);
+		} catch (error) {
+			console.error(error.message, "cause:", error.cause?.message || error.cause);
+			if (!reattempts) {
+				error.stack += "\ncause: " + error.cause.stack;
+				throw error;
+			};
+		}
+	} while (reattempts--)
+}
