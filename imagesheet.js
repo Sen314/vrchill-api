@@ -34,7 +34,7 @@ async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
 		if (!url) return;
 		var image = await loadImage(url);
 		ctx.drawImage(image, x, y, w, h);
-	})().catch(error => console.error(error.stack))));
+	})().catch(error => console.error("imageload", error.stack))));
 
 	return {
 		imagesheet: canvas.toBuffer("image/png"),
