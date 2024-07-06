@@ -4,6 +4,7 @@ import "./util.js";
 import Koa from "koa";
 import Router from "@koa/router";
 import send from "koa-send";
+import qs from "qs";
 import { cachedVRCYoutubeSearch } from "./VRCYoutubeSearch.js"
 import { getImageSheet } from "./imagesheet.js";
 import { resolveVrcUrl } from "./vrcurl.js";
@@ -18,32 +19,34 @@ var router = new Router();
 
 router.get(["/search", "/trending"], async ctx => {
 	if (ctx.path == "/trending") {
-		var query = {"type":"trending"};
+		var input = {"type":"trending"};
 	} else {
-		var query = ctx.querystring.match(/[?&]input=(.*)/i)?.[1];
-		if (!query) {
+		var input = ctx.querystring.match(/[?&]input=(.*)/i)?.[1];
+		if (!input) {
 			ctx.status = 400;
 			ctx.body = "missing search query";
 			return;
 		}
-		query = decodeURIComponent(query).replace(/^.*→/, '').replaceAll("\u200b", '').trim();
+		input = decodeURIComponent(input).replace(/^.*→/, '').replaceAll("\u200b", '').trim();
 	}
 
-	if (!ctx.query.pool || !/^[a-z-_]+\d*$/.test(ctx.query.pool)) {
+	var pqs = qs.parse(ctx.querystring, {parameterLimit: 1})
+
+	if (!pqs.pool || !/^[a-z-_]+\d*$/.test(pqs.pool)) {
 		ctx.status = 400;
 		ctx.body = "invalid pool";
 		return;
 	}
 
 	var options = {
-		thumbnails: stringToBoolean(ctx.query.thumbnails),
-		icons: stringToBoolean(ctx.query.icons),
-		captions: stringToBoolean(ctx.query.captions),
-		mode: ctx.query.mode,
-		bp: ctx.query.bp
+		thumbnails: stringToBoolean(pqs.thumbnails),
+		icons: stringToBoolean(pqs.icons),
+		captions: stringToBoolean(pqs.captions),
+		mode: pqs.mode,
+		bp: pqs.bp
 	};
 
-	ctx.body = await cachedVRCYoutubeSearch(ctx.query.pool, query, options);
+	ctx.body = await cachedVRCYoutubeSearch(pqs.pool, input, options);
 });
 
 
