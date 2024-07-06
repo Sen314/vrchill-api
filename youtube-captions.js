@@ -21,13 +21,16 @@ async function getVideoCaptions(videoId) {
 	captionTracks = await Promise.all(captionTracks.map(captionTrack => (async () => {
 		var xml = await gotw(captionTrack.baseUrl, {resolveBodyOnly: true});
 		var parsed = xmlParser.parse(xml);
+		if (!parsed.transcript || !parsed.transcript.text) {
+			console.error("caption missing lines", parsed, xml);
+		}
 		var lines = parsed.transcript.text.map(({ "#text": text, "@_start": start, "@_dur": dur }) => ({ start: Number(start), dur: Number(dur), text }));
 		return {
 			name: captionTrack.name.simpleText,
 			id: captionTrack.vssId,
 			lines
 		};
-	})().catch(error => console.error(error.stack))));
+	})().catch(error => console.error("getVideoCaptions", error.stack))));
 	return captionTracks;
 }
 
@@ -38,7 +41,7 @@ export async function getVideoCaptionsCached(videoId) {
 		cache[videoId] = getVideoCaptions(videoId);
 		setTimeout(() => {
 			delete cache[videoId];
-		}, 1000*60*60*6); // 6 hours
+		}, 1000*60*10); // 10 minutes
 	}
 	return await cache[videoId];
 }
