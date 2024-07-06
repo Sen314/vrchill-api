@@ -32,7 +32,12 @@ async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
 
 	await Promise.all(images.map(({x, y, w, h, url}) => (async function(){
 		if (!url) return;
-		var image = await loadImage(url);
+		try {
+			var image = await loadImage(url);
+		} catch (error) {
+			console.error("failed to load image", url, error.message);
+			return;
+		}
 		ctx.drawImage(image, x, y, w, h);
 	})().catch(error => console.error("imageload", error.stack))));
 
