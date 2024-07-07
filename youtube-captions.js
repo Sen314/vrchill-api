@@ -19,18 +19,19 @@ async function getVideoCaptions(videoId) {
 	if (!ytInitialPlayerResponse.captions) return [];
 	var captionTracks = ytInitialPlayerResponse.captions.playerCaptionsTracklistRenderer.captionTracks;
 	captionTracks = await Promise.all(captionTracks.map(captionTrack => (async () => {
-		var xml = await gotw(captionTrack.baseUrl, {resolveBodyOnly: true});
-		var parsed = xmlParser.parse(xml);
-		if (!parsed.transcript || !parsed.transcript.text) {
-			console.error("caption missing lines", parsed, xml);
+		try {
+			var xml = await gotw(captionTrack.baseUrl, {resolveBodyOnly: true});
+			var parsed = xmlParser.parse(xml);
+			var lines = parsed.transcript.text.map(({ "#text": text, "@_start": start, "@_dur": dur }) => ({ start: Number(start), dur: Number(dur), text }));
+			return {
+				name: captionTrack.name.simpleText,
+				id: captionTrack.vssId,
+				lines
+			};
+		} catch (error) {
+			console.error("caption track error", error.stack, videoId, captionTrack, xml, parsed, lines);
 		}
-		var lines = parsed.transcript.text.map(({ "#text": text, "@_start": start, "@_dur": dur }) => ({ start: Number(start), dur: Number(dur), text }));
-		return {
-			name: captionTrack.name.simpleText,
-			id: captionTrack.vssId,
-			lines
-		};
-	})().catch(error => console.error("getVideoCaptions", error.stack))));
+	})()));
 	return captionTracks;
 }
 
