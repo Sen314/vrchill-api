@@ -22,7 +22,9 @@ async function getVideoCaptions(videoId) {
 		try {
 			var xml = await gotw(captionTrack.baseUrl, {resolveBodyOnly: true});
 			var parsed = xmlParser.parse(xml);
-			var lines = parsed.transcript.text.map(({ "#text": text, "@_start": start, "@_dur": dur }) => ({ start: Number(start), dur: Number(dur), text }));
+			var lines = parsed.transcript.text;
+			if (!Array.isArray(lines)) lines = [lines];
+			lines = lines.map(({ "#text": text, "@_start": start, "@_dur": dur }) => ({ start: Number(start), dur: Number(dur), text }));
 			return {
 				name: captionTrack.name.simpleText,
 				id: captionTrack.vssId,
