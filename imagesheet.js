@@ -55,7 +55,7 @@ export async function makeImageSheetVrcUrl(pool, images, legacyMode) {
 	promise.then(() => {
 		setTimeout(() => {
 			if (store[key] === promise) delete store[key];
-		}, 1000*60); // 1 min;
+		}, 1000*60*5); // 5 min;
 	});
 	promise.catch(error => {
 		console.error(error.stack);
