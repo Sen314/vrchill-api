@@ -60,11 +60,7 @@ export async function makeImageSheetVrcUrl(pool, images, legacyMode) {
 	promise.catch(error => {
 		console.error(error.stack);
 	});
-	var {thumbnails, icons} = await promise;
-	return {
-		vrcurl: num,
-		thumbnails, icons
-	}
+	return num;
 }
 
 export async function getImageSheet(pool, num) {

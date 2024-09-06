@@ -86,8 +86,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 
 	if (images.length) {
 		try {
-			var {vrcurl: imagesheet_vrcurl} = await makeImageSheetVrcUrl(pool, images, !playlistId && !options.icons);
-			data.imagesheet_vrcurl = imagesheet_vrcurl;
+			data.imagesheet_vrcurl = await makeImageSheetVrcUrl(pool, images, !playlistId && !options.icons);
 		} catch (error) {
 			console.error(error.stack);
 		}
