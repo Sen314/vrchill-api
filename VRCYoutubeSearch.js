@@ -62,7 +62,7 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 			};
 			else {
 				video.thumbnail ||= {
-					url: `https://i.ytimg.com/vi/${data.videoId}/mqdefault.jpg`,
+					url: `https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`,
 					width: 320,
 					height: 180
 				};
