@@ -41,10 +41,7 @@ async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
 		ctx.drawImage(image, x, y, w, h);
 	})().catch(error => console.error("imageload", error.stack))));
 
-	return {
-		imagesheet: canvas.toBuffer("image/png"),
-		images
-	};
+	return canvas.toBuffer("image/png");
 }
 
 export async function makeImageSheetVrcUrl(pool, images, legacyMode) {
@@ -64,5 +61,5 @@ export async function makeImageSheetVrcUrl(pool, images, legacyMode) {
 }
 
 export async function getImageSheet(pool, num) {
-	return (await store[`${pool}:${num}`])?.imagesheet;
+	return await store[`${pool}:${num}`];
 }
