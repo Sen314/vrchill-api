@@ -1,36 +1,36 @@
 import { searchYouTubeVideos, continueYouTubeVideoSearch, getYouTubePlaylist, continueYouTubePlaylist, getTrending } from "./youtube.js";
 import { putVrcUrl } from "./vrcurl.js";
-import { makeImageSheetVrcUrl } from "./imagesheet.js";
+import { createImageSheet } from "./imagesheet.js";
 
 var cache = {};
-
-
 
 export async function cachedVRCYoutubeSearch(pool, query, options) {
 	var key = JSON.stringify([pool, query, options]);
 	if (!cache[key]) {
-		cache[key] = VRCYoutubeSearch(pool, query, options);
+		cache[key] = VRCYoutubeSearch(pool, query, options, key);
 		setTimeout(() => {
 			delete cache[key];
 		}, 1000*60*10); // 10 mins
 	}
-	return await cache[key];
+	return (await cache[key])?.response;
+}
+
+export async function getImageSheet(key) {
+	return await (await cache[key])?.imagesheet
 }
 
 
-
-
-async function VRCYoutubeSearch(pool, query, options = {}) {
+async function VRCYoutubeSearch(pool, query, options = {}, key) {
 	console.log("search", pool, JSON.stringify(query), JSON.stringify(options));
-	var data = {results: []};
+	var response = {results: []};
 
 	if (typeof query == "object") {
 		switch (query.type) {
 			case "trending":
 				var {videos, tabs} = await getTrending(query.bp);
-				data.tabs = [];
+				response.tabs = [];
 				for (let tab of tabs) {
-					data.tabs.push({
+					response.tabs.push({
 						name: tab.name,
 						vrcurl: await putVrcUrl(pool, {type: "trending", bp: tab.bp, options})
 					});
@@ -86,7 +86,8 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 
 	if (images.length) {
 		try {
-			data.imagesheet_vrcurl = await makeImageSheetVrcUrl(pool, images, !playlistId && !options.icons);
+			response.imagesheet_vrcurl = await putVrcUrl(pool, {type: "imagesheet", key});
+			var imagesheet = createImageSheet(images, !playlistId && !options.icons);
 		} catch (error) {
 			console.error(error.stack);
 		}
@@ -112,15 +113,15 @@ async function VRCYoutubeSearch(pool, query, options = {}) {
 			video.captions_vrcurl = await putVrcUrl(pool, {type: "captions", videoId: video.id});
 		}
 		delete video.channel.iconUrl;
-		data.results.push(video);
+		response.results.push(video);
 	}
 
-	if (continuationData) data.nextpage_vrcurl = await putVrcUrl(pool, {
+	if (continuationData) response.nextpage_vrcurl = await putVrcUrl(pool, {
 		type: "continuation",
 		for: query.for || (playlistId ? "playlist" : "search"),
 		continuationData,
 		options
 	});
 
-	return data;
+	return {response, imagesheet};
 }

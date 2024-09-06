@@ -5,8 +5,7 @@ import Koa from "koa";
 import Router from "@koa/router";
 import send from "koa-send";
 import qs from "qs";
-import { cachedVRCYoutubeSearch } from "./VRCYoutubeSearch.js"
-import { getImageSheet } from "./imagesheet.js";
+import { cachedVRCYoutubeSearch, getImageSheet } from "./VRCYoutubeSearch.js"
 import { resolveVrcUrl } from "./vrcurl.js";
 import { getVideoCaptionsCached } from "./youtube-captions.js";
 import { stringToBoolean } from "./util.js";
@@ -68,7 +67,7 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			}
 			break;
 		case "imagesheet":
-			let buf = await getImageSheet(ctx.params.pool, ctx.params.num);
+			let buf = await getImageSheet(dest.key);
 			if (!buf) {
 				ctx.status = 404;
 				return;

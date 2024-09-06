@@ -1,10 +1,7 @@
 import { createCanvas, loadImage } from 'canvas';
 import potpack from 'potpack';
-import { putVrcUrl } from './vrcurl.js';
 
-var store = {};
-
-async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
+export async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
 	images.forEach(image => {
 		image.w = image.width;
 		image.h = image.height;
@@ -42,24 +39,4 @@ async function createImageSheet(images /*[{width, height, url}]*/, legacyMode) {
 	})().catch(error => console.error("imageload", error.stack))));
 
 	return canvas.toBuffer("image/png");
-}
-
-export async function makeImageSheetVrcUrl(pool, images, legacyMode) {
-	var num = await putVrcUrl(pool, {type: "imagesheet"});
-	var key = `${pool}:${num}`;
-	var promise = createImageSheet(images, legacyMode);
-	store[key] = promise;
-	promise.then(() => {
-		setTimeout(() => {
-			if (store[key] === promise) delete store[key];
-		}, 1000*60*10); // 10 min;
-	});
-	promise.catch(error => {
-		console.error(error.stack);
-	});
-	return num;
-}
-
-export async function getImageSheet(pool, num) {
-	return await store[`${pool}:${num}`];
 }
