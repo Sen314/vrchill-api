@@ -31,7 +31,7 @@ router.get(["/search", "/trending"], async ctx => {
 
 	var pqs = qs.parse(ctx.querystring, {duplicates: 'first'});
 
-	if (!pqs.pool || !/^[a-z-_]+\d*$/.test(pqs.pool)) {
+	if (!pqs.pool || /[^a-z-_0-9]/.test(pqs.pool)) {
 		ctx.status = 400;
 		ctx.body = "invalid pool";
 		return;
