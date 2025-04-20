@@ -108,6 +108,7 @@ router.get("/", ctx => {
 
 
 app.use(async (ctx, next) => {
+	console.log("http", ctx.socket.remoteAddress, ctx.get("X-Forwarded-For"), ctx.get("Host") + ctx.originalUrl, ctx.get("User-Agent"), ctx.get("Referer"));
 	try {
 		await next();
 	} catch (error) {
