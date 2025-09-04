@@ -95,13 +95,13 @@ router.get("/robots.txt", ctx => {
 	ctx.body = `User-agent: *\nDisallow: /`;
 });
 
-router.get("/test.html", async ctx => {
+router.get("/", async ctx => {
 	await send(ctx, "test.html");
 });
 
-router.get("/", ctx => {
-	ctx.redirect("https://www.u2b.cx/");
-});
+// router.get("/", ctx => {
+// 	ctx.redirect("https://www.u2b.cx/");
+// });
 
 
 
