@@ -1,64 +1,14 @@
-# VRChat YouTube Search API
+# VRChat Jellyfin Search API
 
-An API server for building YouTube search UIs in VRChat, with pagination, thumbnails and channel icons.
+start api
+node index.js 'Ipwan' 'jellyfin_userid' 'jellyfin_apikey'
 
-Test in browser: https://api.u2b.cx/test.html
 
-# Endpoints
-
-## GET `/search`
-
-Get YouTube videos for a search query.
-
-### Required query parameters
-
-- `pool`: id of the VRCUrl pool, only letters numbers hyphens or underscores, optionally followed by an integer for pool size.
-- `input`: youtube search query. All chars up to and including this exact unicode char `→` are ignored, and then whitespace is trimmed. THIS MUST BE THE LAST QUERY PARAMETER AS ALL CHARS AFTER IT ARE CAPTURED VERBATIM (so you can type & etc without encoding). If this contains a url with a playlist ID, playlist results will be loaded instead (which is a bit different, up to 100 results and no descriptions).
-
-### Optional query parameters
-
-- `thumbnails`: set to `1`, `true`, `yes`, `on` or whatever to load thumbnails
-- `icons`: set to `1`, `true`, `yes`, `on` or whatever to load channel icons
-- `mode`: If set to `latestontop` will search without filter to include the "Latest from ..." section (if it exists). Otherwise it uses search filter for Videos only sorted by Relevance.
-- `bp`: Custom YouTube search filter. Go to youtube search site and set some filters and you will see the corresponding `bp` value in the URL. Overrides `mode` option. Use at your own risk (experimental).
-
-### Example URL
-
-```
-https://api.u2b.cx/search?pool=example10000&input=   Type YouTube search query here →                       penile apparatus
-```
 
 ### Response format
 
 JSON object:
-
-- `results`: Array of Object
-	- `vrcurl`: (integer) index of VRCUrl that will redirect to the youtube url, or serve JSON with captions if used with string loader.
-	- `live`: (boolean) whether it's a live stream
-	- `title`: (string) i.e. `"Nyan Cat! [Official]"`
-	- `id`: (string) YouTube video id i.e. `"2yJgwwDcgV8"`
-	- `description`?: (string) short truncated description snippet i.e. `"http://nyan.cat/ Original song : http://momolabo.lolipop.jp/nyancatsong/Nyan/"` (playlist results don't have this)
-	- `lengthText`?: (string) i.e. `"3:37"`
-	- `longLengthText`?: (string) i.e. `"3 minutes, 37 seconds"`
-	- `viewCountText`?: (string) i.e. `"2,552,243 views"` or `"575 watching"` for live streams (playlist results don't have this)
-	- `shortViewCountText`?: (string) i.e. `"2.5M views"` (streams don't have this)
-	- `uploaded`: (string) i.e. `"12 years ago"`
-	- `channel`: (object)
-		- `name`: (string) i.e. `"NyanCat"`
-		- `id`: (string) i.e. `"UCsW85RAS2_Twg_lEPyv7G8A"`
-		- `icon`?: (object) (playlist results don't have this)
-			- `x`: (integer) px from left
-			- `y`: (integer) px from top
-			- `width`: (integer)
-			- `height`: (integer)
-	- `thumbnail`?: (object)
-		- `x`: (integer) px from left
-		- `y`: (integer) px from top
-		- `width`: (integer)
-		- `height`: (integer)
-- `imagesheet_vrcurl`?: (integer) index of the vrcurl for the collage of thumbnails and/or icons
-- `nextpage_vrcurl`: (integer) index of the vrcurl that will serve the JSON for the next page of results
-
+Nah
 
 ## GET `/trending`
 
