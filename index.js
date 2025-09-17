@@ -10,11 +10,30 @@ import { resolveVrcUrl } from "./vrcurl.js";
 import { getVideoCaptionsCached } from "./youtube-captions.js";
 import { stringToBoolean } from "./util.js";
 import { readFileSync } from "fs";
-var shorturlmap = JSON.parse(readFileSync("./shorturlmap.json", "utf8"));
 
+import { cachedVRCJellyfinSearch, getJellyfinImageSheet } from "./VRCJellyfinSearch.js"
+
+var shorturlmap = JSON.parse(readFileSync("./shorturlmap.json", "utf8"));
 var app = new Koa();
 var router = new Router();
+var baseUrl = '';
+var userId = '';
+var apiKey = '';
 
+process.argv.forEach(function (val, index, array) {
+  switch (index) {
+	case 2 :
+		baseUrl = val;
+		break;
+	case 3 :
+		userId = val;
+		break;
+	case 4:
+		apiKey = val;
+		break;
+  }
+  console.log(index + ': ' + val);
+});
 
 router.get(["/search", "/trending"], async ctx => {
 	if (ctx.path == "/trending") {
@@ -48,6 +67,38 @@ router.get(["/search", "/trending"], async ctx => {
 	ctx.body = await cachedVRCYoutubeSearch(pqs.pool, input, options);
 });
 
+router.get("/vrchill", async ctx => {
+	var pqs = qs.parse(ctx.querystring, {duplicates: 'first'});
+	var input = "limit=6027&recursive=true&userId=" + userId + "&mediaTypes=Video&sortBy=Name";
+	//var input = "limit=6027&recursive=true&parentId=cf1b2fab3616461ff2db14158a278d7a&filters=IsFolder&sortBy=Name&userId=" + userId;
+	// if (ctx.path == "/trending") {
+	// 	var input = {"type":"trending"};
+	// } else {
+	// 	var input = ctx.querystring.match(/[?&]input=(.*)/i)?.[1];
+	// 	if (!input) {
+	// 		ctx.status = 400;
+	// 		ctx.body = "missing search query";
+	// 		return;
+	// 	}
+	// 	input = decodeURIComponent(input).replace(/^.*→/, '').replaceAll("\u200b", '').trim();
+	// }
+
+	if (!pqs.pool || /[^a-z-_0-9]/.test(pqs.pool)) {
+		ctx.status = 400;
+		ctx.body = "invalid pool";
+		return;
+	}
+	
+	var options = {
+		thumbnails: stringToBoolean(pqs.thumbnails),
+		icons: stringToBoolean(pqs.icons),
+		captions: stringToBoolean(pqs.captions),
+		mode: pqs.mode,
+		bp: pqs.bp
+	};
+
+	ctx.body = await cachedVRCJellyfinSearch(pqs.pool, input, options, baseUrl);
+});
 
 router.get("/vrcurl/:pool/:num", async ctx => {
 	var dest = await resolveVrcUrl(ctx.params.pool, ctx.params.num);
@@ -63,11 +114,15 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			if (ctx.get("User-Agent").includes("UnityWebRequest")) {
 				ctx.body = {captions: await getVideoCaptionsCached(dest.id)};
 			} else {
-				ctx.redirect(`https://www.youtube.com/watch?v=${dest.id}`);
+				//ctx.redirect(`https://www.youtube.com/watch?v=${dest.id}`);
+				ctx.redirect(`${baseUrl}/Items/${dest.id}/Download?api_key=${apiKey}`);
 			}
 			break;
+		case "folder":
+			break;
 		case "imagesheet":
-			let buf = await getImageSheet(dest.key);
+			//let buf = await getImageSheet(dest.key);
+			let buf = await getJellyfinImageSheet(dest.key);
 			if (!buf) {
 				ctx.status = 404;
 				return;
@@ -76,10 +131,12 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			ctx.type = "image/png";
 			break;
 		case "continuation":
-			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "continuation", for: dest.for, continuationData: dest.continuationData}, dest.options);
+			//ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "continuation", for: dest.for, continuationData: dest.continuationData}, dest.options);
+			ctx.body = await cachedVRCJellyfinSearch(ctx.params.pool, {type: "continuation", for: dest.for, continuationData: dest.continuationData}, dest.options, baseUrl);
 			break;
 		case "trending":
-			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "trending", bp: dest.bp}, dest.options);
+			//ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "trending", bp: dest.bp}, dest.options);
+			ctx.body = await cachedVRCJellyfinSearch(ctx.params.pool, {type: "trending", bp: dest.bp}, dest.options, baseUrl);
 			break;
 		case "captions":
 			ctx.body = await getVideoCaptionsCached(dest.videoId);
@@ -89,6 +146,47 @@ router.get("/vrcurl/:pool/:num", async ctx => {
 			ctx.status = 500;
 	}
 });
+
+// router.get("/vrcurl/:pool/:num", async ctx => {
+// 	var dest = await resolveVrcUrl(ctx.params.pool, ctx.params.num);
+// 	if (!dest) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
+// 	switch (dest.type) {
+// 		case "redirect":
+// 			ctx.redirect(dest.url);
+// 			break;
+// 		case "video":
+// 			if (ctx.get("User-Agent").includes("UnityWebRequest")) {
+// 				ctx.body = {captions: await getVideoCaptionsCached(dest.id)};
+// 			} else {
+// 				ctx.redirect(`https://www.youtube.com/watch?v=${dest.id}`);
+// 			}
+// 			break;
+// 		case "imagesheet":
+// 			let buf = await getImageSheet(dest.key);
+// 			if (!buf) {
+// 				ctx.status = 404;
+// 				return;
+// 			}
+// 			ctx.body = buf;
+// 			ctx.type = "image/png";
+// 			break;
+// 		case "continuation":
+// 			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "continuation", for: dest.for, continuationData: dest.continuationData}, dest.options);
+// 			break;
+// 		case "trending":
+// 			ctx.body = await cachedVRCYoutubeSearch(ctx.params.pool, {type: "trending", bp: dest.bp}, dest.options);
+// 			break;
+// 		case "captions":
+// 			ctx.body = await getVideoCaptionsCached(dest.videoId);
+// 			break;
+// 		default:
+// 			console.error("unknown vrcurl type", dest.type);
+// 			ctx.status = 500;
+// 	}
+// });
 
 
 router.get("/robots.txt", ctx => {

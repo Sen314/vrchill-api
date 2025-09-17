@@ -8,11 +8,15 @@
 		"keyv": "^4.5.4",
 		"koa": "^2.14.2",
 		"koa-send": "^5.0.1",
+		"npm": "^11.6.0",
 		"potpack": "^2.0.0",
 		"qs": "^6.12.2"
 	},
 	"engines": {
 		"node": ">=18.0.0"
+	},
+	"scripts": {
+		"start": "index.js"
 	},
 	"type": "module"
 }

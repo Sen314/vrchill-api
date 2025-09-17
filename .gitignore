@@ -2,3 +2,5 @@ node_modules
 *.sqlite
 *.sqlite-journal
 ips.txt
+shortcut.bat
+.vscode/launch.json

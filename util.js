@@ -47,3 +47,8 @@ export function gotw(url, options = {}) {
 	//options.timeout = {request: 3000}; //"RequestError: Expected values which are `number` or `undefined`. Received values of type `Function`." what the fuck?
 	return got(url, options);
 }
+
+export function gotw_vrchill(url, options) {
+	//if (ips) options.localAddress = ips[Math.floor(Math.random() * ips.length)];
+	return got.get(url, options);
+}
